@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum KpiStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  LOCKED
+}
+
+enum Polarity {
+  MAX
+  MIN
+  BINARY
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum CycleType {
+  MONTHLY
+  QUARTERLY
+  SEMESTER
+  ANNUAL
+}
+
+enum PeriodStatus {
+  SETUP
+  ACTIVE
+  LOCKED
+  CLOSED
+}
+
+enum AuditAction {
+  // Authentication
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  PASSWORD_UPDATED
+  PASSWORD_RESET
+
+  // User Management
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  BULK_IMPORT_STARTED
+  BULK_IMPORT_COMPLETED
+
+  // KPI Operations
+  KPI_CREATED
+  KPI_SUBMITTED
+  KPI_APPROVED
+  KPI_REJECTED
+  KPI_ACHIEVEMENT_UPDATED
+  KPI_COMMENT_ADDED
+  KPI_ALL_DELETED
+
+  // Period Management
+  PERIOD_CREATED
+  PERIOD_UPDATED
+  PERIOD_DELETED
+  PERIOD_STATUS_CHANGED
+
+  // Reports
+  EXPORT_TRIGGERED
+  EXPORT_COMPLETED
+
+  // System
+  SYSTEM_SEEDED
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  employeeId String   @unique @map("employee_id")
+  fullName   String   @map("full_name")
+  email      String   @unique
+  password   String   @default("")
+  deptCode   String?  @map("dept_code")
+  role       UserRole @default(EMPLOYEE)
+  managerId  Int?     @map("manager_id")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  manager         User?            @relation("ManagerRelation", fields: [managerId], references: [id])
+  subordinates    User[]           @relation("ManagerRelation")
+  kpiHeaders      KpiHeader[]
+  approvedHeaders KpiHeader[]      @relation("ApproverRelation")
+  bulkJobs        BulkImportJob[]
+  auditLogs       AuditLog[]
+  scoringConfigs  ScoringConfig[]
+
+  @@map("users")
+}
+
+model Period {
+  id         Int          @id @default(autoincrement())
+  name       String       @db.VarChar(100)
+  startDate  DateTime     @map("start_date") @db.Date
+  endDate    DateTime     @map("end_date") @db.Date
+  cycleType  CycleType    @map("cycle_type")
+  status     PeriodStatus @default(SETUP)
+  isActive   Boolean      @default(false) @map("is_active")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  kpiHeaders KpiHeader[]
+
+  @@map("periods")
+}
+
+model KpiHeader {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  periodId       Int       @map("period_id")
+  status         KpiStatus @default(DRAFT)
+  totalScore     Decimal   @default(0) @map("total_score") @db.Decimal(5, 2)
+  finalGrade     String?   @map("final_grade") @db.VarChar(2)
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  // Workflow audit fields
+  managerComment String?   @map("manager_comment") @db.Text
+  submittedAt    DateTime? @map("submitted_at")
+  approvedAt     DateTime? @map("approved_at")
+  approverId     Int?      @map("approver_id")
+
+  user     User        @relation(fields: [userId], references: [id])
+  period   Period      @relation(fields: [periodId], references: [id])
+  approver User?       @relation("ApproverRelation", fields: [approverId], references: [id])
+  details  KpiDetail[]
+
+  @@unique([userId, periodId])
+  @@map("kpi_headers")
+}
+
+model KpiDetail {
+  id             Int      @id @default(autoincrement())
+  headerId       Int      @map("header_id")
+  title          String   @db.VarChar(200)
+  definition     String?  @db.Text
+  polarity       Polarity
+  weight         Decimal  @db.Decimal(5, 2)
+  targetValue    Decimal  @map("target_value") @db.Decimal(15, 2)
+  actualValue    Decimal  @default(0) @map("actual_value") @db.Decimal(15, 2)
+  achievementPct Decimal? @map("achievement_pct") @db.Decimal(5, 2)
+  finalScore     Decimal? @map("final_score") @db.Decimal(5, 2)
+  evidenceUrl    String?  @map("evidence_url") @db.VarChar(255)
+  unit           String?  @db.VarChar(20)
+  managerComment String?  @map("manager_comment") @db.Text
+
+  header KpiHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
+
+  @@map("kpi_details")
+}
+
+model BulkImportJob {
+  jobId       String    @id @default(uuid()) @map("job_id")
+  adminId     Int?      @map("admin_id")
+  filename    String?   @db.VarChar(255)
+  totalRows   Int       @default(0) @map("total_rows")
+  successRows Int       @default(0) @map("success_rows")
+  failedRows  Int       @default(0) @map("failed_rows")
+  status      JobStatus @default(QUEUED)
+  errorLogUrl String?   @map("error_log_url") @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  admin User? @relation(fields: [adminId], references: [id])
+
+  @@map("bulk_import_jobs")
+}
+
+model AuditLog {
+  id           Int         @id @default(autoincrement())
+  action       AuditAction
+  userId       Int?        @map("user_id")
+  resourceType String?     @db.VarChar(50)
+  resourceId   Int?        @map("resource_id")
+  details      Json?
+  ipAddress    String?     @map("ip_address") @db.VarChar(45)
+  userAgent    String?     @map("user_agent") @db.Text
+  timestamp    DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}
+
+model ScoringConfig {
+  id               Int      @id @default(autoincrement())
+  capMultiplier    Decimal  @default(1.2) @map("cap_multiplier") @db.Decimal(3, 2)
+  gradeAThreshold  Decimal  @default(90) @map("grade_a_threshold") @db.Decimal(5, 2)
+  gradeBThreshold  Decimal  @default(75) @map("grade_b_threshold") @db.Decimal(5, 2)
+  gradeCThreshold  Decimal  @default(60) @map("grade_c_threshold") @db.Decimal(5, 2)
+  gradeDThreshold  Decimal  @default(50) @map("grade_d_threshold") @db.Decimal(5, 2)
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  updatedBy        Int?     @map("updated_by")
+
+  updater User? @relation(fields: [updatedBy], references: [id])
+
+  @@map("scoring_config")
+}

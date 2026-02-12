@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(npm run dev)",
+      "Bash(kill 96846)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(psql:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(nest g:*)",
+      "Bash(nest g service:*)",
+      "Bash(nest g controller:*)",
+      "Bash(npm run start:dev:*)",
+      "Bash(npx prisma db execute:*)",
+      "Bash(pkill:*)",
+      "Bash(node check-data.js:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(npm run build:*)",
+      "Bash(xargs kill:*)",
+      "Bash(npm install:*)",
+      "Bash(else)",
+      "Bash(fi)",
+      "Bash(__NEW_LINE_5dc30a80fdab1a71__ if [ \"$http_code\" = \"200\" ])",
+      "Bash([ \"$http_code\" = \"201\" ])",
+      "Bash(then)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\" npx prisma migrate reset:*)",
+      "Bash(jq:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AaHJpcy5jb20iLCJyb2xlIjoiQURNSU4iLCJlbXBsb3llZUlkIjoiQURNMDAxIiwiaWF0IjoxNzcwODg4NTc3LCJleHAiOjE3NzA5NzQ5Nzd9.rOED-ta1hbxnJiyYojajKSqJyZ9h732QKDtVV6PgJMk\")",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
+    ]
+  }
+}
