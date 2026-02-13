@@ -32,14 +32,45 @@ print_info() {
     echo -e "ℹ $1"
 }
 
-# Check if .env file exists
+# Check if .env file exists in root
 if [ ! -f ".env" ]; then
-    print_warning ".env file not found. Copying from .env.example..."
+    print_warning ".env file not found in root. Copying from .env.example..."
     cp .env.example .env
-    print_success ".env file created"
+    print_success ".env file created in root"
 else
-    print_success ".env file exists"
+    print_success ".env file exists in root"
 fi
+
+# Check if backend/.env exists
+if [ ! -f "backend/.env" ]; then
+    print_warning "backend/.env not found. Copying from root .env..."
+    cp .env backend/.env
+    print_success "backend/.env file created"
+else
+    print_success "backend/.env file exists"
+fi
+
+# Verify critical environment variables in backend/.env
+print_info "Verifying environment variables..."
+if ! grep -q "DATABASE_URL=" backend/.env; then
+    print_error "DATABASE_URL not found in backend/.env"
+    print_info "Adding DATABASE_URL to backend/.env..."
+    echo 'DATABASE_URL="postgresql://hris_user:hris_password@localhost:5433/hris_db"' >> backend/.env
+fi
+
+if ! grep -q "JWT_SECRET=" backend/.env; then
+    print_warning "JWT_SECRET not found in backend/.env"
+    print_info "Adding JWT_SECRET to backend/.env..."
+    echo "JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-$(date +%s)" >> backend/.env
+fi
+
+if ! grep -q "REDIS_HOST=" backend/.env; then
+    print_info "Adding Redis configuration to backend/.env..."
+    echo "REDIS_HOST=localhost" >> backend/.env
+    echo "REDIS_PORT=6379" >> backend/.env
+fi
+
+print_success "Environment variables verified"
 
 echo ""
 print_info "Step 1: Checking Docker installation..."
