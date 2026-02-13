@@ -6,7 +6,30 @@ Complete step-by-step guide to install and deploy the KPI Management System on a
 
 ## Quick Start (Automated Setup)
 
-For first-time installation, we provide an automated setup script:
+### For Ubuntu/Debian Users
+
+If you're installing on a fresh Ubuntu server, first install prerequisites:
+
+```bash
+# Clone the repository
+git clone git@github.com:itBiensi/kpi-engine.git
+cd kpi-engine
+
+# Install prerequisites (Node.js, Docker, Docker Compose)
+chmod +x install-prerequisites-ubuntu.sh
+./install-prerequisites-ubuntu.sh
+
+# Logout and login (or run: newgrp docker)
+# This activates the docker group permission
+
+# Run automated setup script
+chmod +x setup.sh
+./setup.sh
+```
+
+### For Other Systems (macOS, Windows)
+
+If you already have Node.js, Docker, and Docker Compose installed:
 
 ```bash
 # Clone the repository
@@ -14,6 +37,7 @@ git clone git@github.com:itBiensi/kpi-engine.git
 cd kpi-engine
 
 # Run automated setup script
+chmod +x setup.sh
 ./setup.sh
 ```
 

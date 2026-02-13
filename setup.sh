@@ -42,12 +42,43 @@ else
 fi
 
 echo ""
-print_info "Step 1: Starting Docker services (PostgreSQL & Redis)..."
-docker-compose up -d
+print_info "Step 1: Checking Docker installation..."
+
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    print_error "Docker is not installed"
+    print_info "Please install Docker first:"
+    print_info "  Ubuntu: curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh"
+    print_info "  Or visit: https://docs.docker.com/engine/install/"
+    exit 1
+fi
+
+# Check for docker-compose (standalone) or docker compose (plugin)
+DOCKER_COMPOSE_CMD=""
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+    print_success "Found docker-compose (standalone)"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+    print_success "Found docker compose (plugin)"
+else
+    print_error "Docker Compose is not installed"
+    print_info "Please install Docker Compose:"
+    print_info "  Option 1 (Recommended): sudo apt-get update && sudo apt-get install docker-compose-plugin"
+    print_info "  Option 2: sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose"
+    print_info "  Or visit: https://docs.docker.com/compose/install/"
+    exit 1
+fi
+
+print_info "Starting Docker services (PostgreSQL & Redis)..."
+$DOCKER_COMPOSE_CMD up -d
 if [ $? -eq 0 ]; then
     print_success "Docker services started"
 else
     print_error "Failed to start Docker services"
+    print_info "This might be a permissions issue. Try running with sudo or add your user to docker group:"
+    print_info "  sudo usermod -aG docker \$USER"
+    print_info "  Then logout and login again"
     exit 1
 fi
 
