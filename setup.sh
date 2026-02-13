@@ -56,6 +56,13 @@ if ! grep -q "DATABASE_URL=" backend/.env; then
     print_error "DATABASE_URL not found in backend/.env"
     print_info "Adding DATABASE_URL to backend/.env..."
     echo 'DATABASE_URL="postgresql://hris_user:hris_password@localhost:5433/hris_db"' >> backend/.env
+else
+    # Check if DATABASE_URL has the correct port (5433, not 5432)
+    if grep -q "localhost:5432" backend/.env; then
+        print_warning "DATABASE_URL using wrong port (5432). Fixing to 5433..."
+        sed -i.bak 's/localhost:5432/localhost:5433/g' backend/.env
+        print_success "DATABASE_URL port corrected"
+    fi
 fi
 
 if ! grep -q "JWT_SECRET=" backend/.env; then
