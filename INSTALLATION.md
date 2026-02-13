@@ -4,6 +4,43 @@ Complete step-by-step guide to install and deploy the KPI Management System on a
 
 ---
 
+## Quick Start (Automated Setup)
+
+For first-time installation, we provide an automated setup script:
+
+```bash
+# Clone the repository
+git clone git@github.com:itBiensi/kpi-engine.git
+cd kpi-engine
+
+# Run automated setup script
+./setup.sh
+```
+
+**What the script does:**
+- ✓ Creates .env file from template
+- ✓ Starts Docker services (PostgreSQL & Redis)
+- ✓ Installs all dependencies
+- ✓ Runs database migrations
+- ✓ Seeds admin user
+- ✓ Starts both backend and frontend servers
+
+**After setup completes:**
+- Backend: http://localhost:3001
+- Frontend: http://localhost:3000
+- API Docs: http://localhost:3001/api/docs
+- Admin login: admin@hris.com / admin123
+
+**If you encounter any errors, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)**
+
+---
+
+## Manual Installation
+
+If you prefer manual setup or the automated script fails, follow the steps below:
+
+---
+
 ## Table of Contents
 
 1. [System Requirements](#system-requirements)
