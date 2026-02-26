@@ -200,7 +200,7 @@ export default function KpiPlansPage() {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>KPI Plans</h1>
                     <p className="mt-1 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
@@ -540,7 +540,7 @@ export default function KpiPlansPage() {
             )}
 
             {/* Plans List */}
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden overflow-x-auto">
                 <table className="data-table">
                     <thead>
                         <tr>

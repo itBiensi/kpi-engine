@@ -58,6 +58,7 @@ function AchievementsContent() {
     const [editValues, setEditValues] = useState<Record<number, { actual: string; evidence: string }>>({});
     const [saving, setSaving] = useState<number | null>(null);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [commentValues, setCommentValues] = useState<Record<number, string>>({});
     const [commentSaving, setCommentSaving] = useState<number | null>(null);
     const [showCommentFor, setShowCommentFor] = useState<number | null>(null);
@@ -97,8 +98,26 @@ function AchievementsContent() {
     const handleSave = async (detailId: number) => {
         setSaving(detailId);
         setError("");
+        setSuccessMessage("");
+
+        // Validate evidence URL if provided
+        const vals = editValues[detailId];
+        if (vals.evidence && vals.evidence.trim() !== '') {
+            try {
+                const url = new URL(vals.evidence);
+                if (!['http:', 'https:'].includes(url.protocol)) {
+                    setError('Evidence URL must be a valid HTTP or HTTPS URL.');
+                    setSaving(null);
+                    return;
+                }
+            } catch {
+                setError('Evidence URL is not a valid URL. Please enter a valid URL (e.g., https://example.com).');
+                setSaving(null);
+                return;
+            }
+        }
+
         try {
-            const vals = editValues[detailId];
             const { data } = await kpiApi.updateAchievement(detailId, {
                 actual_value: parseFloat(vals.actual) || 0,
                 evidence_url: vals.evidence || undefined,
@@ -109,6 +128,9 @@ function AchievementsContent() {
                 const { data: updated } = await kpiApi.getPlan(selectedPlanId);
                 setPlan(updated);
             }
+
+            setSuccessMessage('Achievement saved successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to save");
         } finally {
@@ -151,7 +173,7 @@ function AchievementsContent() {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
                         Achievements
@@ -179,6 +201,14 @@ function AchievementsContent() {
                     background: "hsla(0, 62.8%, 50.6%, 0.15)", color: "hsl(0, 72%, 65%)", border: "1px solid hsla(0, 62.8%, 50.6%, 0.3)"
                 }}>
                     {error}
+                </div>
+            )}
+
+            {successMessage && (
+                <div className="p-3 rounded-lg text-sm mb-4 animate-fade-in" role="alert" style={{
+                    background: "hsla(142, 76%, 46%, 0.15)", color: "hsl(142, 76%, 46%)", border: "1px solid hsla(142, 76%, 46%, 0.3)"
+                }}>
+                    ✅ {successMessage}
                 </div>
             )}
 
@@ -238,7 +268,7 @@ function AchievementsContent() {
                     )}
 
                     {/* Score Summary */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="glass-card p-5">
                             <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Total Score</p>
                             <p
@@ -276,7 +306,7 @@ function AchievementsContent() {
                     </div>
 
                     {/* Details Table with Real-time Score */}
-                    <div className="glass-card overflow-hidden">
+                    <div className="glass-card overflow-hidden overflow-x-auto">
                         <table className="data-table">
                             <thead>
                                 <tr>
@@ -304,167 +334,167 @@ function AchievementsContent() {
 
                                     return (
                                         <React.Fragment key={detail.id}>
-                                        <tr>
-                                            <td>
-                                                <div>
-                                                    <p className="font-medium" style={{ color: "hsl(var(--foreground))" }}>{detail.title}</p>
-                                                    {detail.definition && (
-                                                        <p className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
-                                                            {detail.definition}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className="badge badge-draft text-xs">
-                                                    {detail.polarity === "MAX" ? "↑ MAX" : detail.polarity === "MIN" ? "↓ MIN" : "◯ BIN"}
-                                                </span>
-                                            </td>
-                                            <td className="font-semibold">{Number(detail.weight)}%</td>
-                                            <td>{Number(detail.targetValue)}{detail.unit ? ` ${detail.unit}` : ''}</td>
-                                            <td>
-                                                <div className="flex items-center gap-1">
+                                            <tr>
+                                                <td>
+                                                    <div>
+                                                        <p className="font-medium" style={{ color: "hsl(var(--foreground))" }}>{detail.title}</p>
+                                                        {detail.definition && (
+                                                            <p className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                                                {detail.definition}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="badge badge-draft text-xs">
+                                                        {detail.polarity === "MAX" ? "↑ MAX" : detail.polarity === "MIN" ? "↓ MIN" : "◯ BIN"}
+                                                    </span>
+                                                </td>
+                                                <td className="font-semibold">{Number(detail.weight)}%</td>
+                                                <td>{Number(detail.targetValue)}{detail.unit ? ` ${detail.unit}` : ''}</td>
+                                                <td>
+                                                    <div className="flex items-center gap-1">
+                                                        <input
+                                                            type="number"
+                                                            value={vals.actual}
+                                                            onChange={(e) =>
+                                                                setEditValues({
+                                                                    ...editValues,
+                                                                    [detail.id]: { ...vals, actual: e.target.value },
+                                                                })
+                                                            }
+                                                            disabled={!isEditable}
+                                                            className="w-20 text-sm"
+                                                            style={{ opacity: isEditable ? 1 : 0.6, cursor: isEditable ? 'text' : 'not-allowed' }}
+                                                            step="any"
+                                                        />
+                                                        {detail.unit && (
+                                                            <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                                                {detail.unit}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        className={getScoreClass(liveCalc.pct, 100)}
+                                                        style={{ fontWeight: 600 }}
+                                                    >
+                                                        {liveCalc.pct.toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        className={`text-lg font-bold ${getScoreClass(liveCalc.score, Number(detail.weight))}`}
+                                                    >
+                                                        {liveCalc.score.toFixed(2)}
+                                                    </span>
+                                                </td>
+                                                <td>
                                                     <input
-                                                        type="number"
-                                                        value={vals.actual}
+                                                        type="text"
+                                                        value={vals.evidence}
                                                         onChange={(e) =>
                                                             setEditValues({
                                                                 ...editValues,
-                                                                [detail.id]: { ...vals, actual: e.target.value },
+                                                                [detail.id]: { ...vals, evidence: e.target.value },
                                                             })
                                                         }
                                                         disabled={!isEditable}
-                                                        className="w-20 text-sm"
+                                                        placeholder="URL..."
+                                                        className="w-28 text-xs"
                                                         style={{ opacity: isEditable ? 1 : 0.6, cursor: isEditable ? 'text' : 'not-allowed' }}
-                                                        step="any"
                                                     />
-                                                    {detail.unit && (
-                                                        <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
-                                                            {detail.unit}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    className={getScoreClass(liveCalc.pct, 100)}
-                                                    style={{ fontWeight: 600 }}
-                                                >
-                                                    {liveCalc.pct.toFixed(1)}%
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    className={`text-lg font-bold ${getScoreClass(liveCalc.score, Number(detail.weight))}`}
-                                                >
-                                                    {liveCalc.score.toFixed(2)}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="text"
-                                                    value={vals.evidence}
-                                                    onChange={(e) =>
-                                                        setEditValues({
-                                                            ...editValues,
-                                                            [detail.id]: { ...vals, evidence: e.target.value },
-                                                        })
-                                                    }
-                                                    disabled={!isEditable}
-                                                    placeholder="URL..."
-                                                    className="w-28 text-xs"
-                                                    style={{ opacity: isEditable ? 1 : 0.6, cursor: isEditable ? 'text' : 'not-allowed' }}
-                                                />
-                                            </td>
-                                            <td>
-                                                <button
-                                                    onClick={() => handleSave(detail.id)}
-                                                    disabled={saving === detail.id || !isEditable}
-                                                    className={`btn text-xs py-1 px-3 ${isChanged && isEditable ? "btn-primary" : "btn-secondary"}`}
-                                                    style={{ opacity: isEditable ? 1 : 0.5 }}
-                                                >
-                                                    {saving === detail.id ? "..." : "Save"}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {/* Manager Comment Row */}
-                                        {(canAddComments || detail.managerComment) && (
-                                            <tr>
-                                                <td colSpan={9} style={{ padding: "0.5rem 1rem", background: "hsla(217.2, 32.6%, 12%, 0.5)" }}>
-                                                    <div className="flex items-start gap-2">
-                                                        <span style={{ color: "hsl(45, 93%, 47%)", fontSize: "0.75rem", fontWeight: "500", minWidth: "80px" }}>
-                                                            💬 Comment:
-                                                        </span>
-                                                        <div className="flex-1">
-                                                            {showCommentFor === detail.id ? (
-                                                                <div className="space-y-2">
-                                                                    <textarea
-                                                                        value={commentValues[detail.id] || ""}
-                                                                        onChange={(e) => setCommentValues({ ...commentValues, [detail.id]: e.target.value })}
-                                                                        placeholder="Add feedback for this KPI item..."
-                                                                        rows={3}
-                                                                        className="w-full text-sm"
-                                                                        style={{
-                                                                            background: "hsl(var(--secondary))",
-                                                                            color: "hsl(var(--foreground))",
-                                                                            border: "1px solid hsl(var(--border))",
-                                                                            padding: "0.5rem",
-                                                                            borderRadius: "0.375rem",
-                                                                            resize: "vertical"
-                                                                        }}
-                                                                    />
-                                                                    <div className="flex gap-2">
-                                                                        <button
-                                                                            onClick={() => handleCommentSave(detail.id)}
-                                                                            disabled={commentSaving === detail.id}
-                                                                            className="btn btn-primary text-xs py-1 px-3"
-                                                                        >
-                                                                            {commentSaving === detail.id ? "Saving..." : "Save Comment"}
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setShowCommentFor(null);
-                                                                                setCommentValues({ ...commentValues, [detail.id]: detail.managerComment || "" });
-                                                                            }}
-                                                                            className="btn btn-secondary text-xs py-1 px-3"
-                                                                        >
-                                                                            Cancel
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            ) : detail.managerComment ? (
-                                                                <div className="space-y-1">
-                                                                    <p className="text-sm" style={{ color: "hsl(var(--foreground))" }}>
-                                                                        {detail.managerComment}
-                                                                    </p>
-                                                                    {canAddComments && (
-                                                                        <button
-                                                                            onClick={() => setShowCommentFor(detail.id)}
-                                                                            className="text-xs"
-                                                                            style={{ color: "hsl(var(--muted-foreground))", textDecoration: "underline" }}
-                                                                        >
-                                                                            Edit comment
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            ) : canAddComments ? (
-                                                                <button
-                                                                    onClick={() => setShowCommentFor(detail.id)}
-                                                                    className="text-xs"
-                                                                    style={{ color: "hsl(45, 93%, 47%)", textDecoration: "underline" }}
-                                                                >
-                                                                    + Add comment
-                                                                </button>
-                                                            ) : (
-                                                                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>
-                                                                    No comment
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        onClick={() => handleSave(detail.id)}
+                                                        disabled={saving === detail.id || !isEditable}
+                                                        className={`btn text-xs py-1 px-3 ${isChanged && isEditable ? "btn-primary" : "btn-secondary"}`}
+                                                        style={{ opacity: isEditable ? 1 : 0.5 }}
+                                                    >
+                                                        {saving === detail.id ? "..." : "Save"}
+                                                    </button>
                                                 </td>
                                             </tr>
-                                        )}
+                                            {/* Manager Comment Row */}
+                                            {(canAddComments || detail.managerComment) && (
+                                                <tr>
+                                                    <td colSpan={9} style={{ padding: "0.5rem 1rem", background: "hsla(217.2, 32.6%, 12%, 0.5)" }}>
+                                                        <div className="flex items-start gap-2">
+                                                            <span style={{ color: "hsl(45, 93%, 47%)", fontSize: "0.75rem", fontWeight: "500", minWidth: "80px" }}>
+                                                                💬 Comment:
+                                                            </span>
+                                                            <div className="flex-1">
+                                                                {showCommentFor === detail.id ? (
+                                                                    <div className="space-y-2">
+                                                                        <textarea
+                                                                            value={commentValues[detail.id] || ""}
+                                                                            onChange={(e) => setCommentValues({ ...commentValues, [detail.id]: e.target.value })}
+                                                                            placeholder="Add feedback for this KPI item..."
+                                                                            rows={3}
+                                                                            className="w-full text-sm"
+                                                                            style={{
+                                                                                background: "hsl(var(--secondary))",
+                                                                                color: "hsl(var(--foreground))",
+                                                                                border: "1px solid hsl(var(--border))",
+                                                                                padding: "0.5rem",
+                                                                                borderRadius: "0.375rem",
+                                                                                resize: "vertical"
+                                                                            }}
+                                                                        />
+                                                                        <div className="flex gap-2">
+                                                                            <button
+                                                                                onClick={() => handleCommentSave(detail.id)}
+                                                                                disabled={commentSaving === detail.id}
+                                                                                className="btn btn-primary text-xs py-1 px-3"
+                                                                            >
+                                                                                {commentSaving === detail.id ? "Saving..." : "Save Comment"}
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setShowCommentFor(null);
+                                                                                    setCommentValues({ ...commentValues, [detail.id]: detail.managerComment || "" });
+                                                                                }}
+                                                                                className="btn btn-secondary text-xs py-1 px-3"
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : detail.managerComment ? (
+                                                                    <div className="space-y-1">
+                                                                        <p className="text-sm" style={{ color: "hsl(var(--foreground))" }}>
+                                                                            {detail.managerComment}
+                                                                        </p>
+                                                                        {canAddComments && (
+                                                                            <button
+                                                                                onClick={() => setShowCommentFor(detail.id)}
+                                                                                className="text-xs"
+                                                                                style={{ color: "hsl(var(--muted-foreground))", textDecoration: "underline" }}
+                                                                            >
+                                                                                Edit comment
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                ) : canAddComments ? (
+                                                                    <button
+                                                                        onClick={() => setShowCommentFor(detail.id)}
+                                                                        className="text-xs"
+                                                                        style={{ color: "hsl(45, 93%, 47%)", textDecoration: "underline" }}
+                                                                    >
+                                                                        + Add comment
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>
+                                                                        No comment
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </React.Fragment>
                                     );
                                 })}

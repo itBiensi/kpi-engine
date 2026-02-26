@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "KPI",
+    "projectPath": "/Users/mac158/Documents/KPI",
+    "testIds": [],
+    "additionalInstruction": "The project is running via Docker containers in production mode. Frontend on port 3000, backend on port 3001. To login, use email: admin@hris.com and password: admin123. Before login works, the admin user must be seeded by clicking the \"First time? Click to seed admin user\" link on the login page, which calls POST /api/v1/auth/seed.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-k0nKreobn1Zlq2SVRShO2CR7U2bOk_hjOGo3guh0W0fHrY-ifW-yHtHkGpg-xdVFHMS9b2XQ4yJfNLoK2xiUOFPXkZ3Px5LrwYgrwSpceN9h2VWLh404II7k1URfNBZM-pk"
+    }
+  },
+  "serverPort": 51426,
+  "proxy": "http://922f522a-db76-4ef6-84d8-450c333bf471:xhzGjXTkHaAfJKWCJLwIFCeurPH9QBzf@tun.testsprite.com:8080"
+}

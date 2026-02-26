@@ -1,0 +1,102 @@
+# ===========================================
+# KPI Management System — Production Stack
+# ===========================================
+# Usage:
+#   cp .env.production .env
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Includes: Caddy (auto-HTTPS), Backend, Frontend, PostgreSQL, Redis
+
+services:
+
+  # ─── Caddy Reverse Proxy ──────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: kpi-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+  # ─── PostgreSQL Database ──────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: kpi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hris_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hris_password}
+      POSTGRES_DB: ${POSTGRES_DB:-hris_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-hris_user} -d ${POSTGRES_DB:-hris_db}' ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # No port exposed to host — only accessible from Docker network
+
+    # ─── Redis ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kpi-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # No port exposed to host — only accessible from Docker network
+
+    # ─── Backend (NestJS API) ─────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kpi-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://hris_user:hris_password@postgres:5432/hris_db}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-super-secret-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-24h}
+      PORT: 3001
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # No port exposed to host — accessed via Caddy
+
+    # ─── Frontend (Next.js) ───────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    container_name: kpi-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    # No port exposed to host — accessed via Caddy
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

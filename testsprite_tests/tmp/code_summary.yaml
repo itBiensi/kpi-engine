@@ -1,0 +1,264 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - Next.js 16
+  - Tailwind CSS 4
+  - Zustand
+  - Axios
+  - React Hook Form
+  - Zod
+routes:
+  - path: /
+    file: src/app/page.tsx
+    auth_required: false
+    description: Root redirect - checks localStorage for token, redirects to /dashboard or /login
+  - path: /login
+    file: src/app/login/page.tsx
+    auth_required: false
+    description: User login page with email/password form and admin seed button
+  - path: /dashboard
+    file: src/app/dashboard/page.tsx
+    auth_required: true
+    description: Dashboard overview with stats cards (employees, KPI plans, bulk jobs) and quick action links
+  - path: /dashboard/kpi
+    file: src/app/dashboard/kpi/page.tsx
+    auth_required: true
+    description: KPI plan management - create, submit, approve, reject KPI plans with period filtering
+  - path: /dashboard/achievements
+    file: src/app/dashboard/achievements/page.tsx
+    auth_required: true
+    description: Achievement tracking - enter actual values, evidence URLs, and manager comments for KPI details
+  - path: /dashboard/users
+    file: src/app/dashboard/users/page.tsx
+    auth_required: true
+    description: User management - list, create, edit users and reset passwords (Admin only)
+  - path: /dashboard/bulk-upload
+    file: src/app/dashboard/bulk-upload/page.tsx
+    auth_required: true
+    description: Bulk user import via Excel file upload with drag-and-drop, template download, and job status tracking
+  - path: /dashboard/periods
+    file: src/app/dashboard/periods/page.tsx
+    auth_required: true
+    description: Period management - create, edit, delete evaluation periods and trigger KPI report exports
+  - path: /dashboard/scoring-config
+    file: src/app/dashboard/scoring-config/page.tsx
+    auth_required: true
+    description: Scoring configuration - set cap multiplier and grade thresholds (A/B/C/D/E)
+  - path: /dashboard/audit-log
+    file: src/app/dashboard/audit-log/page.tsx
+    auth_required: true
+    description: Audit log viewer with filtering by action, user, date range, and pagination
+features:
+  - name: User Login
+    description: Login with email and password credentials. Includes admin seed functionality for first-time setup.
+    files:
+      - src/app/login/page.tsx
+      - src/stores/auth.store.ts
+      - src/lib/api.ts
+    entry_route: /login
+    user_interactions:
+      - Fill email input field (default pre-filled with admin@hris.com)
+      - Fill password input field (default pre-filled with admin123)
+      - Click Sign In button to submit login form
+      - See error message on invalid credentials
+      - Click "First time? Click to seed admin user" to seed default admin
+    api_calls:
+      - method: POST
+        endpoint: /api/v1/auth/login
+      - method: POST
+        endpoint: /api/v1/auth/seed
+    auth_required: false
+  - name: Dashboard Overview
+    description: Landing page after login showing stats cards and quick action links
+    files:
+      - src/app/dashboard/page.tsx
+      - src/app/dashboard/layout.tsx
+    entry_route: /dashboard
+    user_interactions:
+      - View total employees, KPI plans count, and bulk jobs count
+      - Click quick action cards to navigate to KPI, Bulk Upload, or Achievements pages
+      - Use sidebar navigation to switch between dashboard sections
+      - Toggle between light and dark theme
+      - Click logout button
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/users
+      - method: GET
+        endpoint: /api/v1/kpi/plans
+      - method: GET
+        endpoint: /api/v1/admin/jobs
+    auth_required: true
+  - name: KPI Plan Management
+    description: Create, view, submit, approve, and reject KPI plans with detailed targets
+    files:
+      - src/app/dashboard/kpi/page.tsx
+      - src/components/PeriodSelector.tsx
+      - src/components/StatusBadge.tsx
+      - src/components/WorkflowActions.tsx
+    entry_route: /dashboard/kpi
+    user_interactions:
+      - Select a period from the period selector dropdown
+      - Click Create KPI Plan button to open the creation form
+      - Add KPI detail rows with title, definition, polarity, weight, target value, and unit
+      - Remove KPI detail rows
+      - Submit the KPI plan form
+      - Click Submit on a DRAFT plan to send for approval
+      - Click Approve on a SUBMITTED plan (manager role)
+      - Click Reject on a SUBMITTED plan with comment
+      - Click Delete All to remove all KPI plans
+      - View plan details in expandable rows
+    api_calls:
+      - method: POST
+        endpoint: /api/v1/kpi/plans
+      - method: GET
+        endpoint: /api/v1/kpi/plans
+      - method: GET
+        endpoint: /api/v1/kpi/plans/:id
+      - method: POST
+        endpoint: /api/v1/kpi/plans/:id/submit
+      - method: POST
+        endpoint: /api/v1/kpi/plans/:id/approve
+      - method: POST
+        endpoint: /api/v1/kpi/plans/:id/reject
+      - method: DELETE
+        endpoint: /api/v1/kpi/plans/all
+    auth_required: true
+  - name: Achievement Tracking
+    description: Enter actual values and evidence for approved KPI plans, with real-time score calculation
+    files:
+      - src/app/dashboard/achievements/page.tsx
+      - src/components/StatusBadge.tsx
+      - src/components/WorkflowActions.tsx
+    entry_route: /dashboard/achievements
+    user_interactions:
+      - Select a KPI plan from the list
+      - Enter actual value for each KPI detail
+      - Enter evidence URL for each KPI detail
+      - Click Save to update achievement data
+      - View auto-calculated achievement percentage and score
+      - Add manager comments on KPI details
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/kpi/plans
+      - method: GET
+        endpoint: /api/v1/kpi/plans/:id
+      - method: PUT
+        endpoint: /api/v1/kpi/achievements/:detailId
+      - method: PUT
+        endpoint: /api/v1/kpi/details/:detailId/comment
+    auth_required: true
+  - name: User Management
+    description: CRUD operations for managing employees, including create, edit, and password reset
+    files:
+      - src/app/dashboard/users/page.tsx
+    entry_route: /dashboard/users
+    user_interactions:
+      - View paginated user list with search and department filtering
+      - Click Add User button to open creation modal
+      - Fill in employee ID, full name, email, department, role, and manager fields
+      - Click Edit button to modify existing user
+      - Click Reset Password button to set a new password for a user
+      - Search users by name or email
+      - Filter users by department code
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/users
+      - method: POST
+        endpoint: /api/v1/users
+      - method: PUT
+        endpoint: /api/v1/users/:id
+      - method: POST
+        endpoint: /api/v1/auth/password/reset
+    auth_required: true
+  - name: Bulk User Import
+    description: Upload Excel files to bulk import users with drag-and-drop support and job tracking
+    files:
+      - src/app/dashboard/bulk-upload/page.tsx
+      - src/stores/bulk-upload.store.ts
+    entry_route: /dashboard/bulk-upload
+    user_interactions:
+      - Drag and drop an Excel file into the upload zone
+      - Click to browse and select an Excel file
+      - Download the Excel template for bulk import
+      - View import job status (queued, processing, completed, failed)
+      - Download error log for failed jobs
+    api_calls:
+      - method: POST
+        endpoint: /api/v1/admin/users/bulk
+      - method: GET
+        endpoint: /api/v1/admin/jobs
+      - method: GET
+        endpoint: /api/v1/admin/jobs/:jobId
+      - method: GET
+        endpoint: /api/v1/admin/users/template
+      - method: GET
+        endpoint: /api/v1/admin/jobs/:jobId/error-log
+    auth_required: true
+  - name: Period Management
+    description: CRUD for evaluation periods with KPI report export functionality
+    files:
+      - src/app/dashboard/periods/page.tsx
+    entry_route: /dashboard/periods
+    user_interactions:
+      - View list of all periods with status badges
+      - Click Create Period to open creation modal
+      - Fill in period name, start date, end date, cycle type, and status
+      - Click Edit to modify existing period
+      - Click Delete to remove a period
+      - Click Export KPI Report to trigger report generation for a period
+      - View export job progress and download completed reports
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/periods
+      - method: POST
+        endpoint: /api/v1/periods
+      - method: PUT
+        endpoint: /api/v1/periods/:id
+      - method: DELETE
+        endpoint: /api/v1/periods/:id
+      - method: GET
+        endpoint: /api/v1/admin/reports/kpi-export
+      - method: GET
+        endpoint: /api/v1/admin/reports/kpi-export/status/:jobId
+      - method: GET
+        endpoint: /api/v1/admin/reports/kpi-export/download/:jobId
+    auth_required: true
+  - name: Scoring Configuration
+    description: Configure scoring parameters including cap multiplier and grade thresholds
+    files:
+      - src/app/dashboard/scoring-config/page.tsx
+    entry_route: /dashboard/scoring-config
+    user_interactions:
+      - View current scoring configuration with grade thresholds
+      - Modify cap multiplier value
+      - Modify grade A/B/C/D threshold values
+      - Click Save Configuration button
+      - See validation errors for invalid threshold values
+      - Preview grade assignment for sample scores
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/scoring-config
+      - method: PUT
+        endpoint: /api/v1/scoring-config
+    auth_required: true
+  - name: Audit Log
+    description: View system audit trail with filtering and pagination
+    files:
+      - src/app/dashboard/audit-log/page.tsx
+    entry_route: /dashboard/audit-log
+    user_interactions:
+      - View paginated audit log entries
+      - Filter by action type
+      - Filter by user
+      - Filter by date range (start and end date)
+      - Click Search to apply filters
+      - Click Reset to clear filters
+      - View audit log details including IP address and user agent
+    api_calls:
+      - method: GET
+        endpoint: /api/v1/admin/audit-log
+      - method: GET
+        endpoint: /api/v1/admin/audit-log/stats
+    auth_required: true
+known_limitations: []

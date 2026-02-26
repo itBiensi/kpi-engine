@@ -1,0 +1,84 @@
+import asyncio
+from playwright import async_api
+from playwright.async_api import expect
+
+async def run_test():
+    pw = None
+    browser = None
+    context = None
+
+    try:
+        # Start a Playwright session in asynchronous mode
+        pw = await async_api.async_playwright().start()
+
+        # Launch a Chromium browser in headless mode with custom arguments
+        browser = await pw.chromium.launch(
+            headless=True,
+            args=[
+                "--window-size=1280,720",         # Set the browser window size
+                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
+                "--ipc=host",                     # Use host-level IPC for better stability
+                "--single-process"                # Run the browser in a single process mode
+            ],
+        )
+
+        # Create a new browser context (like an incognito window)
+        context = await browser.new_context()
+        context.set_default_timeout(5000)
+
+        # Open a new page in the browser context
+        page = await context.new_page()
+
+        # Interact with the page elements to simulate user flow
+        # -> Navigate to http://localhost:3000
+        await page.goto("http://localhost:3000", wait_until="commit", timeout=10000)
+        
+        # -> Click the 'First time? Click to seed admin user' button to seed the admin user, then sign in.
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div[2]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Click the 'Scoring Config' navigation item (index 163) to open the Scoring Configuration page.
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/aside/nav/a[8]').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # --> Assertions to verify final state
+        frame = context.pages[-1]
+        # Assert the app navigated to the dashboard page
+        assert "/dashboard" in frame.url
+        
+        # Verify the Scoring Config navigation item is visible and its text contains 'Scoring'
+        nav_scoring = frame.locator('xpath=/html/body/div[2]/aside/nav/a[8]')
+        assert await nav_scoring.is_visible()
+        nav_text = await nav_scoring.inner_text()
+        assert "Scoring" in nav_text
+        
+        # Verify the Cap Multiplier input is visible and has the expected value
+        cap_input = frame.locator('xpath=/html/body/div[2]/main/div/div[1]/div[1]/input')
+        assert await cap_input.is_visible()
+        assert await cap_input.input_value() == "1.5"
+        
+        # Verify a Grade Threshold input (Grade A) is visible and has the expected value
+        grade_a_input = frame.locator('xpath=/html/body/div[2]/main/div/div[1]/div[2]/div/div[1]/input')
+        assert await grade_a_input.is_visible()
+        assert await grade_a_input.input_value() == "92"
+        await asyncio.sleep(5)
+
+    finally:
+        if context:
+            await context.close()
+        if browser:
+            await browser.close()
+        if pw:
+            await pw.stop()
+
+asyncio.run(run_test())
+    

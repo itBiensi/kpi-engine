@@ -38,6 +38,8 @@ export default function AuditLogPage() {
         endDate: '',
     });
     const [expandedRow, setExpandedRow] = useState<number | null>(null);
+    const [dateRangeError, setDateRangeError] = useState('');
+    const [fetchTrigger, setFetchTrigger] = useState(0);
 
     // Check if user is admin
     useEffect(() => {
@@ -50,7 +52,7 @@ export default function AuditLogPage() {
         if (user?.role === 'ADMIN') {
             fetchLogs();
         }
-    }, [filters.page, filters.limit]);
+    }, [filters.page, filters.limit, fetchTrigger]);
 
     const fetchLogs = async () => {
         try {
@@ -76,11 +78,18 @@ export default function AuditLogPage() {
     };
 
     const handleSearch = () => {
+        // Validate date range
+        if (filters.startDate && filters.endDate && filters.startDate > filters.endDate) {
+            setDateRangeError('Invalid date range: Start date must be before end date.');
+            return;
+        }
+        setDateRangeError('');
         setFilters({ ...filters, page: 1 });
-        fetchLogs();
+        setFetchTrigger(prev => prev + 1);
     };
 
     const handleReset = () => {
+        setDateRangeError('');
         setFilters({
             page: 1,
             limit: 50,
@@ -90,6 +99,7 @@ export default function AuditLogPage() {
             startDate: '',
             endDate: '',
         });
+        setFetchTrigger(prev => prev + 1);
     };
 
     const totalPages = Math.ceil(total / filters.limit);
@@ -201,6 +211,12 @@ export default function AuditLogPage() {
                         </button>
                     </div>
                 </div>
+
+                {dateRangeError && (
+                    <div className="mt-3 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+                        {dateRangeError}
+                    </div>
+                )}
             </div>
 
             {/* Stats */}
@@ -243,6 +259,9 @@ export default function AuditLogPage() {
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         IP Address
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        User Agent
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Details
@@ -289,6 +308,9 @@ export default function AuditLogPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {log.ipAddress || '—'}
                                             </td>
+                                            <td className="px-6 py-4 text-sm text-gray-500 max-w-[200px] truncate" title={log.userAgent || ''}>
+                                                {log.userAgent || '—'}
+                                            </td>
                                             <td className="px-6 py-4 text-sm">
                                                 {log.details ? (
                                                     <button
@@ -306,7 +328,7 @@ export default function AuditLogPage() {
                                         </tr>
                                         {expandedRow === log.id && log.details && (
                                             <tr>
-                                                <td colSpan={7} className="px-6 py-4 bg-gray-50">
+                                                <td colSpan={8} className="px-6 py-4 bg-gray-50">
                                                     <div className="text-sm">
                                                         <div className="font-semibold mb-2">Details:</div>
                                                         <pre className="bg-white p-3 rounded border border-gray-200 overflow-x-auto text-xs">
@@ -332,7 +354,7 @@ export default function AuditLogPage() {
 
             {/* Pagination */}
             {!loading && logs.length > 0 && (
-                <div className="mt-6 flex items-center justify-between">
+                <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-2">
                         <label className="text-sm text-gray-700">Rows per page:</label>
                         <select

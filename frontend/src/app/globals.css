@@ -583,3 +583,33 @@ textarea:focus {
 [data-theme="light"] .btn-secondary:hover:not(:disabled) {
   background: hsl(214, 32%, 85%) !important;
 }
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 767px) {
+
+  /* Reduce heading sizes on mobile */
+  h1 {
+    font-size: 1.375rem !important;
+  }
+
+  /* Data tables: ensure minimum width for horizontal scroll readability */
+  .data-table {
+    min-width: 640px;
+  }
+
+  /* Glass cards: reduce padding on mobile */
+  .glass-card {
+    padding: 0.75rem;
+  }
+
+  /* Modals: full-width on small screens */
+  .glass-card[class*="max-w-"] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+
+  /* Smaller buttons for mobile */
+  .btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}

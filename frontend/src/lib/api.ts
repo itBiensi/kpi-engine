@@ -115,6 +115,10 @@ export const kpiApi = {
         api.put(`/api/v1/kpi/details/${detailId}/comment`, { comment }),
 
     deleteAll: () => api.delete('/api/v1/kpi/plans/all'),
+
+    getNineBoxData: (periodId?: number) =>
+        api.get('/api/v1/kpi/nine-box', { params: periodId ? { periodId } : {} }),
+
     cascadeKpi: (data: {
         sourceDetailId: number;
         targetUserId: number;

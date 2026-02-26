@@ -84,6 +84,16 @@ const navItems = [
         ),
         adminOnly: true,
     },
+    {
+        label: "Nine-Box Grid",
+        href: "/dashboard/nine-box",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+            </svg>
+        ),
+        adminOnly: true,
+    },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -92,6 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const router = useRouter();
     const pathname = usePathname();
     const [mounted, setMounted] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Password change modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -177,8 +188,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <div className="dashboard-root flex min-h-screen">
+            {/* Mobile top bar */}
+            <div className="fixed top-0 left-0 right-0 z-30 flex items-center gap-3 p-3 border-b md:hidden sidebar">
+                <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: "hsl(var(--foreground))" }}
+                    aria-label="Open menu"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <span className="sidebar-title font-bold text-sm">HRIS</span>
+                </div>
+            </div>
+
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/60 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="sidebar w-64 flex flex-col border-r fixed h-full z-20">
+            <aside className={`sidebar w-64 flex flex-col border-r fixed h-full z-50 transition-transform duration-300 ease-in-out md:translate-x-0 md:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}>
                 {/* Logo */}
                 <div className="sidebar-logo p-5 border-b">
                     <div className="flex items-center gap-3">
@@ -191,11 +233,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <h1 className="sidebar-title font-bold text-sm">HRIS</h1>
                             <p className="sidebar-subtitle text-xs">Performance Mgmt</p>
                         </div>
+                        {/* Close button for mobile */}
+                        <button
+                            onClick={() => setSidebarOpen(false)}
+                            className="ml-auto p-1.5 rounded-lg md:hidden"
+                            style={{ color: "hsl(var(--muted-foreground))" }}
+                            aria-label="Close menu"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-3 space-y-1">
+                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                     {navItems
                         .filter((item) => !item.adminOnly || user?.role === 'ADMIN')
                         .map((item) => {
@@ -204,15 +257,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    onClick={() => setSidebarOpen(false)}
                                     className={`nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive ? 'nav-link-active' : ''}`}
                                 >
                                     <span className={isActive ? 'nav-icon-active' : ''}>
                                         {item.icon}
                                     </span>
                                     {item.label}
-                            </Link>
-                        );
-                    })}
+                                </Link>
+                            );
+                        })}
                 </nav>
 
                 {/* Theme Toggle */}
@@ -266,9 +320,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </svg>
                         </button>
                         <button
-                            onClick={() => { logout(); router.push("/login"); }}
+                            onClick={() => {
+                                logout();
+                                window.location.href = '/login';
+                            }}
                             className="sidebar-subtitle p-1.5 rounded-lg transition-colors hover:bg-gray-700"
                             title="Logout"
+                            aria-label="Logout"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -279,7 +337,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </aside>
 
             {/* Main content */}
-            <main className="flex-1 ml-64 p-6" style={{ minHeight: "100vh" }}>
+            <main className="flex-1 md:ml-64 p-4 pt-16 md:p-6 md:pt-6" style={{ minHeight: "100vh" }}>
                 {children}
             </main>
 

@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: hris-postgres
+    container_name: kpi-postgres
     environment:
       POSTGRES_USER: hris_user
       POSTGRES_PASSWORD: hris_password
@@ -18,7 +18,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: hris-redis
+    container_name: kpi-redis
     ports:
       - '6379:6379'
     volumes:
@@ -28,6 +28,41 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kpi-backend
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://hris_user:hris_password@postgres:5432/hris_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: super-secret-key-change-in-production
+      JWT_EXPIRATION: 24h
+      PORT: 3001
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+    container_name: kpi-frontend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:

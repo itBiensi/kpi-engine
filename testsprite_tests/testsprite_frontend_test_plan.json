@@ -1,0 +1,1940 @@
+[
+  {
+    "id": "TC001",
+    "title": "Dashboard shows key stats cards after login",
+    "description": "Verifies the post-login dashboard loads and displays the three primary stat cards for employees, KPI plans, and bulk jobs.",
+    "category": "Dashboard Overview",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Employees\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"KPI Plans\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Bulk Jobs\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Quick action navigates from Dashboard to KPI plan management",
+    "description": "Verifies the KPI quick action card on the dashboard routes the user to the KPI plan management page.",
+    "category": "Dashboard Overview",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"KPI\" quick action card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/kpi\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"KPI\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Sidebar navigation routes from Dashboard to Achievements",
+    "description": "Verifies the sidebar can be used to navigate from the dashboard overview to the achievements page.",
+    "category": "Dashboard Overview",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Achievements\" in the sidebar navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/achievements\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Achievements\""
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Quick action navigates from Dashboard to Bulk Upload",
+    "description": "Verifies the Bulk Upload quick action card on the dashboard routes the user to the bulk upload page.",
+    "category": "Dashboard Overview",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Bulk Upload\" quick action card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/bulk-upload\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Bulk\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Theme toggle switches the dashboard theme state",
+    "description": "Verifies that the theme toggle can be used from the dashboard UI and produces a visible theme change.",
+    "category": "Dashboard Overview",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Theme toggle\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Theme toggle\" control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dark\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Logout redirects to login screen",
+    "description": "Verifies that clicking logout from the dashboard returns the user to the login page.",
+    "category": "Dashboard Overview",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Logout\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/login\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Login\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Dashboard layout renders sidebar and primary navigation items",
+    "description": "Verifies the dashboard shell renders expected navigation affordances for moving between major sections.",
+    "category": "Dashboard Overview",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"KPI\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Achievements\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Create a KPI plan with one KPI detail row for a selected period",
+    "description": "Verifies a user can create a KPI plan by selecting a period, completing one KPI detail row, and submitting the form so the plan appears in the list.",
+    "category": "KPI Plan Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the KPI menu item/link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/kpi\""
+      },
+      {
+        "type": "action",
+        "description": "Select a period from the period selector dropdown"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Update achievement actual values and evidence and see recalculated plan metrics",
+    "description": "Verifies a user can update actual values and evidence URLs for KPI details and see the achievement percentage and score reflect the updates after saving.",
+    "category": "Achievement Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Achievement %\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Save actual value and evidence for a single KPI detail and confirm success feedback",
+    "description": "Verifies saving achievement updates provides visible confirmation that changes were saved.",
+    "category": "Achievement Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Type \"50\" into the first KPI detail \"Actual value\" field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"https://example.com/evidence\" into the first KPI detail \"Evidence URL\" field"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Persist manager comment on a KPI detail for an approved plan",
+    "description": "Verifies a manager comment can be added to a KPI detail on an approved KPI plan and is still visible after saving.",
+    "category": "Achievement Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select an approved KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Reviewed and verified.\" into the first KPI detail \"Manager comment\" field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Save\" to update achievement data"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Manager comment remains visible after save on the selected plan",
+    "description": "Verifies the manager comment is visible on-screen after saving (persistence confirmation within the same session/view).",
+    "category": "Achievement Tracking",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select an approved KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Save\" to update achievement data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Manager comment\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Invalid evidence URL shows validation error and prevents save",
+    "description": "Verifies entering an invalid evidence URL format shows a visible validation error message when saving.",
+    "category": "Achievement Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Type \"not-a-url\" into the first KPI detail \"Evidence URL\" field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Save\" to update achievement data"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Evidence URL accepts a valid HTTPS link without showing an error",
+    "description": "Verifies a properly formatted HTTPS evidence URL does not trigger validation errors on save.",
+    "category": "Achievement Tracking",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Type \"https://example.com/proof\" into the first KPI detail \"Evidence URL\" field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Real-time calculation indicators are visible after entering an actual value",
+    "description": "Verifies the UI shows calculated achievement percentage and/or score indicators when actual values are entered.",
+    "category": "Achievement Tracking",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Type \"10\" into the first KPI detail \"Actual value\" field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Score\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Save button updates achievement data and keeps the user on Achievements page",
+    "description": "Verifies saving achievement changes does not navigate away unexpectedly and remains within the achievements workflow.",
+    "category": "Achievement Tracking",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Achievements\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select a KPI plan from the list"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Save\" to update achievement data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/achievements\""
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Create a new user from the Users page",
+    "description": "Verifies an admin can create a new user and see it appear in the user list.",
+    "category": "User Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Users\" link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/users\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Add User\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Add User\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E-EMP-1001\" into the Employee ID field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E Test User\" into the Full Name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"e2e.user.1001@example.com\" into the Email field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Engineering\" from the Department dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Employee\" from the Role dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select the first available option from the Manager dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"e2e.user.1001@example.com\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Filter users by department code",
+    "description": "Verifies the department filter narrows results and displays users belonging to the selected department.",
+    "category": "User Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Users\" link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/users\""
+      },
+      {
+        "type": "action",
+        "description": "Select \"Engineering\" from the Department filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Engineering\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"All\" from the Department filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"User list table\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Add User modal validates required email field",
+    "description": "Verifies the create user form shows a visible validation message when the email is missing.",
+    "category": "User Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Users\" link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/users\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Add User\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Add User\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E-EMP-2001\" into the Employee ID field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E Missing Email\" into the Full Name field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Engineering\" from the Department dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Employee\" from the Role dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select the first available option from the Manager dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Email is required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Paginate the user list",
+    "description": "Verifies the user list supports pagination and changes visible content when moving to the next page.",
+    "category": "User Management",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Users\" link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/users\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Pagination controls\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Next\" pagination button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Page 2\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Non-admin view shows restricted controls on Users page",
+    "description": "Verifies that a non-admin user cannot see or use Add/Edit/Reset Password controls on the Users page.",
+    "category": "User Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Users\" link in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/users\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Add User button\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Edit button\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Reset Password button\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Bulk Upload page shows a visible job list/status tracking section",
+    "description": "Verifies the Bulk Upload page includes a visible jobs/status area so users can track queued/processing/completed/failed states.",
+    "category": "Bulk User Import",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign In\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Bulk Upload\" in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/bulk-upload\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Jobs\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Status\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Create a new evaluation period successfully",
+    "description": "Verifies an authenticated user can create a new period and see it appear in the periods list.",
+    "category": "Period Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Periods\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Create Period\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Create Period\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E Period - Q1\" into the period name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"2026-01-01\" into the start date field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"2026-03-31\" into the end date field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Quarterly\" from the cycle type dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Active\" from the status dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"E2E Period - Q1\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "View periods list and status badges",
+    "description": "Verifies the periods page loads and shows periods with visible status indicators.",
+    "category": "Period Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Periods\" navigation item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Periods\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Status\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"periods list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Create period validation: end date before start date",
+    "description": "Verifies the UI blocks saving when end date is earlier than start date and shows a visible validation message.",
+    "category": "Period Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Periods\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Create Period\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Create Period\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"E2E Invalid Date Period\" into the period name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"2026-04-01\" into the start date field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"2026-03-01\" into the end date field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"End date must be after start date\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Create period validation: required fields missing",
+    "description": "Verifies required field validation is shown when attempting to save an empty Create Period form.",
+    "category": "Period Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Periods\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Create Period\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Create Period\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Period name is required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Save updated cap multiplier and grade thresholds successfully",
+    "description": "Verifies an authenticated user can update cap multiplier and grade thresholds and sees a success confirmation with updated values displayed.",
+    "category": "Scoring Configuration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Scoring\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"1.5\" into the cap multiplier field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save Configuration\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"success\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Edit grade threshold values and confirm they persist after save",
+    "description": "Verifies changes to grade A/B/C/D thresholds can be saved and the updated threshold values are shown on the page.",
+    "category": "Scoring Configuration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Grade thresholds\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"90\" into the Grade A threshold field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"80\" into the Grade B threshold field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save Configuration\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"success\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"90\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Validation error when a threshold is out of range",
+    "description": "Verifies the UI prevents saving when a grade threshold is outside the allowed 0–100 range and shows a visible validation message.",
+    "category": "Scoring Configuration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"110\" into the Grade A threshold field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save Configuration\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"0\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"100\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Validation error when thresholds overlap or are not strictly ordered",
+    "description": "Verifies saving is blocked and a validation error is shown when grade thresholds overlap or violate expected ordering.",
+    "category": "Scoring Configuration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"80\" into the Grade A threshold field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"85\" into the Grade B threshold field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save Configuration\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"validation\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Preview grade assignment for a sample score",
+    "description": "Verifies the preview tool assigns and displays a grade for an entered sample score.",
+    "category": "Scoring Configuration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Preview\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"92\" into the sample score field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Preview\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Grade\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Preview updates when sample score changes",
+    "description": "Verifies the preview result changes when a different sample score is entered and preview is run again.",
+    "category": "Scoring Configuration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"95\" into the sample score field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Preview\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Grade\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"55\" into the sample score field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Preview\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Grade\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Cap multiplier field rejects non-numeric input with visible error",
+    "description": "Verifies the cap multiplier input enforces numeric validation and shows a visible error when non-numeric text is provided.",
+    "category": "Scoring Configuration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"abc\" into the cap multiplier field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save Configuration\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"number\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Page shows existing scoring configuration on load",
+    "description": "Verifies the scoring configuration page loads and displays current configuration sections such as cap multiplier and grade thresholds.",
+    "category": "Scoring Configuration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the Log in button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Scoring Config\" navigation item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Scoring\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cap multiplier\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Grade thresholds\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC035",
+    "title": "Audit Log: Navigate to Audit Log and view first page of entries with details visible",
+    "description": "Verifies the audit log page loads and shows a paginated list with IP and user agent details visible for entries.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/audit-log\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"IP\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC036",
+    "title": "Audit Log: Pagination - go to next page and see different page of results",
+    "description": "Verifies pagination works by moving from the first page to the next page of audit log entries.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Next\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Next\" pagination button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Previous\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC037",
+    "title": "Audit Log: Pagination - go next then back to previous page",
+    "description": "Verifies the user can move forward and then return to the prior page using pagination controls.",
+    "category": "Audit Log",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Next\" pagination button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Previous\" pagination button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Next\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC038",
+    "title": "Audit Log: Apply filters by action, user, and date range then search",
+    "description": "Verifies filtering by action type, user, and date range returns a filtered audit log list.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Action\" dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"User\" dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-01-01\" into the \"Start date\" field"
+      }
+    ]
+  },
+  {
+    "id": "TC039",
+    "title": "Audit Log: Apply filters by action, user, and date range then verify filtered results show",
+    "description": "Completes the filter flow by setting end date and searching, then verifies filtered results are displayed.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-01-01\" into the \"Start date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-01-31\" into the \"End date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User Agent\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC040",
+    "title": "Audit Log: Invalid date range shows validation error (start date after end date)",
+    "description": "Verifies the UI prevents searching with an invalid date range and shows a visible validation message.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-02-15\" into the \"Start date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-02-01\" into the \"End date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Search\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC041",
+    "title": "Audit Log: Invalid date range - verify error text is visible",
+    "description": "Verifies a clear error message is shown for a start date that is after the end date.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-02-15\" into the \"Start date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2026-02-01\" into the \"End date\" field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid date range\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC042",
+    "title": "Audit Log: Reset clears action/user/date filters and restores unfiltered list",
+    "description": "Verifies the Reset control clears all filters and the full unfiltered audit list is shown again.",
+    "category": "Audit Log",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Login\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Audit Log\" item in the navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Action\" dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Reset\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Search\" is visible"
+      }
+    ]
+  }
+]

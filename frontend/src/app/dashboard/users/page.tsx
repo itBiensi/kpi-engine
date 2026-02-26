@@ -11,6 +11,7 @@ export default function UsersPage() {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [deptFilter, setDeptFilter] = useState("");
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -52,12 +53,14 @@ export default function UsersPage() {
 
     useEffect(() => {
         loadUsers();
-    }, [page, search]);
+    }, [page, search, deptFilter]);
 
     const loadUsers = async () => {
         setLoading(true);
         try {
-            const { data } = await usersApi.list({ page, limit, search: search || undefined });
+            const params: any = { page, limit, search: search || undefined };
+            if (deptFilter) params.deptCode = deptFilter;
+            const { data } = await usersApi.list(params);
             setUsers(data.data || []);
             setTotal(data.total || 0);
         } catch {
@@ -194,7 +197,7 @@ export default function UsersPage() {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
                         Users Management
@@ -223,19 +226,30 @@ export default function UsersPage() {
                 </div>
             </div>
 
-            {/* Search */}
-            <div className="mb-4">
+            {/* Search & Department Filter */}
+            <div className="mb-4 flex flex-wrap gap-3">
                 <input
                     type="text"
                     placeholder="Search by name, email, or employee ID..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-full max-w-md"
+                    className="flex-1 min-w-[200px] max-w-md"
                 />
+                <select
+                    value={deptFilter}
+                    onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
+                    className="w-48"
+                    aria-label="Filter by department"
+                >
+                    <option value="">All Departments</option>
+                    {Array.from(new Set(users.map((u: any) => u.deptCode).filter(Boolean))).sort().map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                </select>
             </div>
 
             {/* Table */}
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden overflow-x-auto">
                 <table className="data-table">
                     <thead>
                         <tr>

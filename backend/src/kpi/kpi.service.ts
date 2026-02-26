@@ -758,4 +758,85 @@ export class KpiService {
             headersDeleted: headersDeleted.count,
         };
     }
+
+    /**
+     * Get Nine-Box Grid data for talent management
+     * Performance (X-axis): Based on totalScore — Low (0–50), Medium (50–75), High (75+)
+     * Potential (Y-axis): Based on finalGrade — Low (E/D), Medium (C), High (A/B)
+     * Admin only
+     */
+    async getNineBoxData(periodId?: number) {
+        const where: Prisma.KpiHeaderWhereInput = {};
+        if (periodId) where.periodId = periodId;
+
+        const headers = await this.prisma.kpiHeader.findMany({
+            where,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        employeeId: true,
+                        deptCode: true,
+                        role: true,
+                    },
+                },
+                period: {
+                    select: { id: true, name: true },
+                },
+            },
+            orderBy: { totalScore: 'desc' },
+        });
+
+        const employees = headers.map((h) => {
+            const score = Number(h.totalScore);
+            const grade = h.finalGrade || 'E';
+
+            // Performance level based on totalScore
+            let performanceLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+            if (score >= 75) performanceLevel = 'HIGH';
+            else if (score >= 50) performanceLevel = 'MEDIUM';
+            else performanceLevel = 'LOW';
+
+            // Potential level based on finalGrade
+            let potentialLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+            if (grade === 'A' || grade === 'B') potentialLevel = 'HIGH';
+            else if (grade === 'C') potentialLevel = 'MEDIUM';
+            else potentialLevel = 'LOW';
+
+            return {
+                userId: h.user.id,
+                fullName: h.user.fullName,
+                employeeId: h.user.employeeId,
+                deptCode: h.user.deptCode,
+                role: h.user.role,
+                totalScore: score,
+                finalGrade: grade,
+                performanceLevel,
+                potentialLevel,
+                periodId: h.period.id,
+                periodName: h.period.name,
+                planId: h.id,
+                status: h.status,
+            };
+        });
+
+        // Build grid summary
+        const grid: Record<string, number> = {
+            'HIGH_HIGH': 0, 'HIGH_MEDIUM': 0, 'HIGH_LOW': 0,
+            'MEDIUM_HIGH': 0, 'MEDIUM_MEDIUM': 0, 'MEDIUM_LOW': 0,
+            'LOW_HIGH': 0, 'LOW_MEDIUM': 0, 'LOW_LOW': 0,
+        };
+
+        employees.forEach((e) => {
+            const key = `${e.performanceLevel}_${e.potentialLevel}`;
+            grid[key] = (grid[key] || 0) + 1;
+        });
+
+        return {
+            employees,
+            grid,
+            total: employees.length,
+        };
+    }
 }

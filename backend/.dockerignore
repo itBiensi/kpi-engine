@@ -1,0 +1,17 @@
+node_modules
+dist
+.env
+.env.*
+*.log
+*.log.*
+uploads/*
+!uploads/.gitkeep
+coverage
+.nyc_output
+.git
+.gitignore
+README.md
+docs
+exports
+*.js
+!nest-cli.json

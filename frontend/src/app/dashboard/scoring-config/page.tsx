@@ -8,6 +8,7 @@ export default function ScoringConfigPage() {
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sampleScore, setSampleScore] = useState('');
 
   const [config, setConfig] = useState({
     capMultiplier: 1.2,
@@ -326,6 +327,37 @@ export default function ScoringConfigPage() {
             </tr>
           </tbody>
         </table>
+
+        {/* Interactive Score Preview */}
+        <div className="mt-6">
+          <h3 className="text-md font-medium text-gray-700 mb-2">Try a Score</h3>
+          <p className="text-sm text-gray-500 mb-3">
+            Enter any score to preview the grade assignment:
+          </p>
+          <div className="flex items-center gap-4 mb-4">
+            <input
+              type="number"
+              step="0.1"
+              value={sampleScore}
+              onChange={(e) => setSampleScore(e.target.value)}
+              placeholder="Enter score (e.g., 85)"
+              className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {sampleScore !== '' && !isNaN(parseFloat(sampleScore)) && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
+                <span className="text-sm text-gray-600">Grade:</span>
+                <span className={`text-2xl font-bold ${getGradeForScore(parseFloat(sampleScore)) === 'A' ? 'text-green-600' :
+                    getGradeForScore(parseFloat(sampleScore)) === 'B' ? 'text-blue-600' :
+                      getGradeForScore(parseFloat(sampleScore)) === 'C' ? 'text-yellow-600' :
+                        getGradeForScore(parseFloat(sampleScore)) === 'D' ? 'text-orange-600' :
+                          'text-red-600'
+                  }`}>
+                  {getGradeForScore(parseFloat(sampleScore))}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Example Calculations */}
         <div className="mt-6">

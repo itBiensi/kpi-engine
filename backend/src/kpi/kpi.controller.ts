@@ -24,6 +24,19 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiParam, 
 export class KpiController {
     constructor(private readonly kpiService: KpiService) { }
 
+    @Get('nine-box')
+    @UseGuards(RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({ summary: 'Get Nine-Box Grid data for talent management (admin only)' })
+    @ApiQuery({ name: 'periodId', required: false, type: Number, description: 'Filter by period ID' })
+    @ApiResponse({ status: 200, description: 'Nine-Box Grid data retrieved successfully' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    getNineBoxData(@Query('periodId') periodId?: string) {
+        return this.kpiService.getNineBoxData(
+            periodId ? parseInt(periodId, 10) : undefined,
+        );
+    }
+
     @Post('plans')
     @ApiOperation({ summary: 'Create a new KPI plan' })
     @ApiResponse({ status: 201, description: 'KPI plan created successfully' })

@@ -112,7 +112,7 @@ export default function BulkUploadPage() {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
                         Bulk User Upload
@@ -237,7 +237,7 @@ export default function BulkUploadPage() {
             )}
 
             {/* Job History */}
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden overflow-x-auto">
                 <div className="p-4 border-b" style={{ borderColor: "hsla(217.2, 32.6%, 20%, 0.5)" }}>
                     <h3 className="font-semibold" style={{ color: "hsl(var(--foreground))" }}>
                         Upload History

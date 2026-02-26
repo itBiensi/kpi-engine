@@ -251,7 +251,7 @@ export default function PeriodsPage() {
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
                         Period Management
@@ -301,7 +301,7 @@ export default function PeriodsPage() {
             )}
 
             {/* Periods Table */}
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden overflow-x-auto">
                 <table className="data-table">
                     <thead>
                         <tr>
