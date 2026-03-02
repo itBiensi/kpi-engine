@@ -1,32 +1,9 @@
 # ===========================================
 # KPI Management System — Production Stack
+# (Client-Side Config for Central Proxy)
 # ===========================================
-# Usage:
-#   cp .env.production .env
-#   docker compose -f docker-compose.prod.yml up -d --build
-#
-# Includes: Caddy (auto-HTTPS), Backend, Frontend, PostgreSQL, Redis
 
 services:
-
-  # ─── Caddy Reverse Proxy ──────────────────
-  caddy:
-    image: caddy:2-alpine
-    container_name: kpi-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp" # HTTP/3
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - frontend
-      - backend
 
   # ─── PostgreSQL Database ──────────────────
   postgres:
@@ -44,9 +21,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # No port exposed to host — only accessible from Docker network
+    networks:
+      - kpi-internal
 
-    # ─── Redis ────────────────────────────────
+  # ─── Redis ────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: kpi-redis
@@ -58,9 +36,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # No port exposed to host — only accessible from Docker network
+    networks:
+      - kpi-internal
 
-    # ─── Backend (NestJS API) ─────────────────
+  # ─── Backend (NestJS API) ─────────────────
   backend:
     build:
       context: ./backend
@@ -80,9 +59,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # No port exposed to host — accessed via Caddy
+    networks:
+      - kpi-internal
+      - web-gateway # Agar bisa dijangkau oleh Global Caddy
 
-    # ─── Frontend (Next.js) ───────────────────
+  # ─── Frontend (Next.js) ───────────────────
   frontend:
     build:
       context: ./frontend
@@ -93,10 +74,18 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    # No port exposed to host — accessed via Caddy
+    networks:
+      - kpi-internal
+      - web-gateway # Agar bisa dijangkau oleh Global Caddy
+
+networks:
+  # Network internal agar app bisa chat dengan DB/Redis tanpa gangguan luar
+  kpi-internal:
+    driver: bridge
+  # Network eksternal untuk jembatan ke Caddy Pusat
+  web-gateway:
+    external: true
 
 volumes:
   postgres_data:
   redis_data:
-  caddy_data:
-  caddy_config:
