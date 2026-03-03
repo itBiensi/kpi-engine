@@ -207,14 +207,14 @@ model AuditLog {
 }
 
 model ScoringConfig {
-  id               Int      @id @default(autoincrement())
-  capMultiplier    Decimal  @default(1.2) @map("cap_multiplier") @db.Decimal(3, 2)
-  gradeAThreshold  Decimal  @default(90) @map("grade_a_threshold") @db.Decimal(5, 2)
-  gradeBThreshold  Decimal  @default(75) @map("grade_b_threshold") @db.Decimal(5, 2)
-  gradeCThreshold  Decimal  @default(60) @map("grade_c_threshold") @db.Decimal(5, 2)
-  gradeDThreshold  Decimal  @default(50) @map("grade_d_threshold") @db.Decimal(5, 2)
-  updatedAt        DateTime @updatedAt @map("updated_at")
-  updatedBy        Int?     @map("updated_by")
+  id                   Int      @id @default(autoincrement())
+  capMultiplier        Decimal  @default(1.2) @map("cap_multiplier") @db.Decimal(3, 2)
+  excellentThreshold   Decimal  @default(130) @map("excellent_threshold") @db.Decimal(5, 2)
+  veryGoodThreshold    Decimal  @default(110) @map("very_good_threshold") @db.Decimal(5, 2)
+  goodThreshold        Decimal  @default(90) @map("good_threshold") @db.Decimal(5, 2)
+  poorThreshold        Decimal  @default(70) @map("poor_threshold") @db.Decimal(5, 2)
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  updatedBy            Int?     @map("updated_by")
 
   updater User? @relation(fields: [updatedBy], references: [id])
 

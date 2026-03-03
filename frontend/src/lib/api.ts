@@ -165,9 +165,9 @@ export const scoringConfigApi = {
 
     updateConfig: (data: {
         capMultiplier?: number;
-        gradeAThreshold?: number;
-        gradeBThreshold?: number;
-        gradeCThreshold?: number;
-        gradeDThreshold?: number;
+        excellentThreshold?: number;
+        veryGoodThreshold?: number;
+        goodThreshold?: number;
+        poorThreshold?: number;
     }) => api.put('/api/v1/scoring-config', data),
 };

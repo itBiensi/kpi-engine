@@ -12,10 +12,10 @@ export default function ScoringConfigPage() {
 
   const [config, setConfig] = useState({
     capMultiplier: 1.2,
-    gradeAThreshold: 90,
-    gradeBThreshold: 75,
-    gradeCThreshold: 60,
-    gradeDThreshold: 50,
+    excellentThreshold: 130,
+    veryGoodThreshold: 110,
+    goodThreshold: 90,
+    poorThreshold: 70,
   });
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -32,10 +32,10 @@ export default function ScoringConfigPage() {
       const { data } = await scoringConfigApi.getConfig();
       setConfig({
         capMultiplier: Number(data.capMultiplier),
-        gradeAThreshold: Number(data.gradeAThreshold),
-        gradeBThreshold: Number(data.gradeBThreshold),
-        gradeCThreshold: Number(data.gradeCThreshold),
-        gradeDThreshold: Number(data.gradeDThreshold),
+        excellentThreshold: Number(data.excellentThreshold),
+        veryGoodThreshold: Number(data.veryGoodThreshold),
+        goodThreshold: Number(data.goodThreshold),
+        poorThreshold: Number(data.poorThreshold),
       });
     } catch (error: any) {
       setErrors(['Failed to load scoring configuration']);
@@ -54,17 +54,17 @@ export default function ScoringConfigPage() {
     }
 
     // Validate thresholds are in descending order
-    if (config.gradeAThreshold <= config.gradeBThreshold) {
-      newErrors.push('Grade A threshold must be greater than Grade B threshold');
+    if (config.excellentThreshold <= config.veryGoodThreshold) {
+      newErrors.push('Excellent threshold must be greater than Very Good threshold');
     }
-    if (config.gradeBThreshold <= config.gradeCThreshold) {
-      newErrors.push('Grade B threshold must be greater than Grade C threshold');
+    if (config.veryGoodThreshold <= config.goodThreshold) {
+      newErrors.push('Very Good threshold must be greater than Good threshold');
     }
-    if (config.gradeCThreshold <= config.gradeDThreshold) {
-      newErrors.push('Grade C threshold must be greater than Grade D threshold');
+    if (config.goodThreshold <= config.poorThreshold) {
+      newErrors.push('Good threshold must be greater than Poor threshold');
     }
-    if (config.gradeDThreshold <= 0) {
-      newErrors.push('Grade D threshold must be greater than 0');
+    if (config.poorThreshold <= 0) {
+      newErrors.push('Poor threshold must be greater than 0');
     }
 
     setErrors(newErrors);
@@ -93,11 +93,28 @@ export default function ScoringConfigPage() {
   };
 
   const getGradeForScore = (score: number): string => {
-    if (score > config.gradeAThreshold) return 'A';
-    if (score > config.gradeBThreshold) return 'B';
-    if (score > config.gradeCThreshold) return 'C';
-    if (score > config.gradeDThreshold) return 'D';
-    return 'E';
+    if (score > config.excellentThreshold) return 'Excellent';
+    if (score > config.veryGoodThreshold) return 'Very Good';
+    if (score > config.goodThreshold) return 'Good';
+    if (score > config.poorThreshold) return 'Poor';
+    return 'Bad';
+  };
+
+  const getGradeColor = (grade: string): string => {
+    switch (grade) {
+      case 'Excellent':
+        return 'text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900';
+      case 'Very Good':
+        return 'text-cyan-700 dark:text-cyan-200 bg-cyan-100 dark:bg-cyan-800';
+      case 'Good':
+        return 'text-green-700 dark:text-green-200 bg-green-100 dark:bg-green-800';
+      case 'Poor':
+        return 'text-amber-700 dark:text-amber-200 bg-amber-100 dark:bg-amber-800';
+      case 'Bad':
+        return 'text-red-700 dark:text-red-200 bg-red-100 dark:bg-red-800';
+      default:
+        return 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800';
+    }
   };
 
   // Check if user is admin
@@ -126,14 +143,14 @@ export default function ScoringConfigPage() {
         Configure dynamic scoring rules for KPI calculations. Changes apply to all future score calculations.
       </p>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Score Calculation Settings</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">Score Calculation Settings</h2>
 
         {/* Cap Multiplier */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Cap Multiplier
-            <span className="text-gray-500 font-normal ml-2">
+            <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">
               (Maximum score as % of weight)
             </span>
           </label>
@@ -146,94 +163,98 @@ export default function ScoringConfigPage() {
             onChange={(e) =>
               setConfig({ ...config, capMultiplier: parseFloat(e.target.value) || 1.2 })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Current: {(config.capMultiplier * 100).toFixed(0)}% of weight. Default is 1.2 (120%).
           </p>
         </div>
 
         {/* Grade Thresholds */}
         <div className="mb-4">
-          <h3 className="text-md font-medium text-gray-700 mb-3">Grade Thresholds</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Total scores above these thresholds will receive the corresponding letter grade.
+          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">Category Thresholds (%)</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Total scores above these percentage thresholds will receive the corresponding category rating.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Grade A */}
+            {/* Excellent */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grade A Threshold
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="inline-block w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded mr-2"></span>
+                Excellent Threshold
               </label>
               <input
                 type="number"
-                step="0.1"
-                value={config.gradeAThreshold}
+                step="1"
+                value={config.excellentThreshold}
                 onChange={(e) =>
-                  setConfig({ ...config, gradeAThreshold: parseFloat(e.target.value) || 90 })
+                  setConfig({ ...config, excellentThreshold: parseFloat(e.target.value) || 130 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Score &gt; {config.gradeAThreshold} = Grade A
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Score &gt; {config.excellentThreshold}% = Excellent
               </p>
             </div>
 
-            {/* Grade B */}
+            {/* Very Good */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grade B Threshold
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="inline-block w-3 h-3 bg-cyan-500 dark:bg-cyan-400 rounded mr-2"></span>
+                Very Good Threshold
               </label>
               <input
                 type="number"
-                step="0.1"
-                value={config.gradeBThreshold}
+                step="1"
+                value={config.veryGoodThreshold}
                 onChange={(e) =>
-                  setConfig({ ...config, gradeBThreshold: parseFloat(e.target.value) || 75 })
+                  setConfig({ ...config, veryGoodThreshold: parseFloat(e.target.value) || 110 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Score &gt; {config.gradeBThreshold} = Grade B
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Score &gt; {config.veryGoodThreshold}% = Very Good
               </p>
             </div>
 
-            {/* Grade C */}
+            {/* Good */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grade C Threshold
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="inline-block w-3 h-3 bg-green-500 dark:bg-green-400 rounded mr-2"></span>
+                Good Threshold
               </label>
               <input
                 type="number"
-                step="0.1"
-                value={config.gradeCThreshold}
+                step="1"
+                value={config.goodThreshold}
                 onChange={(e) =>
-                  setConfig({ ...config, gradeCThreshold: parseFloat(e.target.value) || 60 })
+                  setConfig({ ...config, goodThreshold: parseFloat(e.target.value) || 90 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Score &gt; {config.gradeCThreshold} = Grade C
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Score &gt; {config.goodThreshold}% = Good
               </p>
             </div>
 
-            {/* Grade D */}
+            {/* Poor */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grade D Threshold
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="inline-block w-3 h-3 bg-amber-500 dark:bg-amber-400 rounded mr-2"></span>
+                Poor Threshold
               </label>
               <input
                 type="number"
-                step="0.1"
-                value={config.gradeDThreshold}
+                step="1"
+                value={config.poorThreshold}
                 onChange={(e) =>
-                  setConfig({ ...config, gradeDThreshold: parseFloat(e.target.value) || 50 })
+                  setConfig({ ...config, poorThreshold: parseFloat(e.target.value) || 70 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Score &gt; {config.gradeDThreshold} = Grade D
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Score &gt; {config.poorThreshold}% = Poor
               </p>
             </div>
           </div>
@@ -241,14 +262,14 @@ export default function ScoringConfigPage() {
 
         {/* Success Message */}
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 px-4 py-3 rounded mb-4">
             <strong>Success:</strong> {successMessage}
           </div>
         )}
 
         {/* Validation Errors */}
         {errors.length > 0 && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
             <strong>Validation Errors:</strong>
             <ul className="list-disc list-inside mt-2">
               {errors.map((error, idx) => (
@@ -271,58 +292,58 @@ export default function ScoringConfigPage() {
       </div>
 
       {/* Grade Preview Table */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Grade Preview</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Preview of how total scores will be graded with current thresholds:
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">Category Preview</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Preview of how total scores will be categorized with current thresholds:
         </p>
 
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2 text-left">Score Range</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Grade</th>
+            <tr className="bg-gray-100 dark:bg-gray-700">
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left dark:text-white">Score Range (%)</th>
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left dark:text-white">Category</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                &gt; {config.gradeAThreshold}
+            <tr className="bg-blue-50 dark:bg-blue-900">
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold dark:text-gray-300">
+                &gt; {config.excellentThreshold}%
               </td>
-              <td className="border border-gray-300 px-4 py-2 font-semibold text-green-600">
-                A (Excellent)
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                {config.gradeBThreshold + 0.01} - {config.gradeAThreshold}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 font-semibold text-blue-600">
-                B (Good)
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-blue-600 dark:text-blue-300">
+                Excellent
               </td>
             </tr>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                {config.gradeCThreshold + 0.01} - {config.gradeBThreshold}
+            <tr className="bg-cyan-50 dark:bg-cyan-800">
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
+                {config.veryGoodThreshold}% - {config.excellentThreshold}%
               </td>
-              <td className="border border-gray-300 px-4 py-2 font-semibold text-yellow-600">
-                C (Satisfactory)
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                {config.gradeDThreshold + 0.01} - {config.gradeCThreshold}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 font-semibold text-orange-600">
-                D (Needs Improvement)
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-cyan-600 dark:text-cyan-300">
+                Very Good
               </td>
             </tr>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                ≤ {config.gradeDThreshold}
+            <tr className="bg-green-50 dark:bg-green-800">
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
+                {config.goodThreshold}% - {config.veryGoodThreshold}%
               </td>
-              <td className="border border-gray-300 px-4 py-2 font-semibold text-red-600">
-                E (Unsatisfactory)
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-green-600 dark:text-green-300">
+                Good
+              </td>
+            </tr>
+            <tr className="bg-amber-50 dark:bg-amber-800">
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
+                {config.poorThreshold}% - {config.goodThreshold}%
+              </td>
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-amber-600 dark:text-amber-300">
+                Poor
+              </td>
+            </tr>
+            <tr className="bg-red-50 dark:bg-red-800">
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
+                &le; {config.poorThreshold}%
+              </td>
+              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-red-600 dark:text-red-300">
+                Bad
               </td>
             </tr>
           </tbody>
@@ -330,28 +351,23 @@ export default function ScoringConfigPage() {
 
         {/* Interactive Score Preview */}
         <div className="mt-6">
-          <h3 className="text-md font-medium text-gray-700 mb-2">Try a Score</h3>
-          <p className="text-sm text-gray-500 mb-3">
-            Enter any score to preview the grade assignment:
+          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Try a Score</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+            Enter any score percentage to preview the category assignment:
           </p>
           <div className="flex items-center gap-4 mb-4">
             <input
               type="number"
-              step="0.1"
+              step="1"
               value={sampleScore}
               onChange={(e) => setSampleScore(e.target.value)}
-              placeholder="Enter score (e.g., 85)"
-              className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter score % (e.g., 115)"
+              className="w-48 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {sampleScore !== '' && !isNaN(parseFloat(sampleScore)) && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
-                <span className="text-sm text-gray-600">Grade:</span>
-                <span className={`text-2xl font-bold ${getGradeForScore(parseFloat(sampleScore)) === 'A' ? 'text-green-600' :
-                    getGradeForScore(parseFloat(sampleScore)) === 'B' ? 'text-blue-600' :
-                      getGradeForScore(parseFloat(sampleScore)) === 'C' ? 'text-yellow-600' :
-                        getGradeForScore(parseFloat(sampleScore)) === 'D' ? 'text-orange-600' :
-                          'text-red-600'
-                  }`}>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 ${getGradeColor(getGradeForScore(parseFloat(sampleScore)))}`}>
+                <span className="text-sm font-medium">Category:</span>
+                <span className="text-xl font-bold">
                   {getGradeForScore(parseFloat(sampleScore))}
                 </span>
               </div>
@@ -361,19 +377,20 @@ export default function ScoringConfigPage() {
 
         {/* Example Calculations */}
         <div className="mt-6">
-          <h3 className="text-md font-medium text-gray-700 mb-2">Example Scores:</h3>
+          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Example Scores:</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {[100, 85, 70, 55, 40].map((score) => (
-              <div
-                key={score}
-                className="border border-gray-300 rounded p-3 text-center"
-              >
-                <div className="text-2xl font-bold">{score}</div>
-                <div className="text-sm text-gray-600">
-                  Grade: <span className="font-semibold">{getGradeForScore(score)}</span>
+            {[140, 120, 100, 80, 60].map((score) => {
+              const grade = getGradeForScore(score);
+              return (
+                <div
+                  key={score}
+                  className={`border border-gray-300 dark:border-gray-600 rounded p-3 text-center ${getGradeColor(grade)}`}
+                >
+                  <div className="text-2xl font-bold">{score}%</div>
+                  <div className="text-sm font-semibold mt-1">{grade}</div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -532,10 +532,10 @@ export class KpiService {
         const config = await this.scoringConfigService.getConfig();
         const scoringConfig: ScoringConfigValues = {
             capMultiplier: Number(config.capMultiplier),
-            gradeAThreshold: Number(config.gradeAThreshold),
-            gradeBThreshold: Number(config.gradeBThreshold),
-            gradeCThreshold: Number(config.gradeCThreshold),
-            gradeDThreshold: Number(config.gradeDThreshold),
+            excellentThreshold: Number(config.excellentThreshold),
+            veryGoodThreshold: Number(config.veryGoodThreshold),
+            goodThreshold: Number(config.goodThreshold),
+            poorThreshold: Number(config.poorThreshold),
         };
 
         // Calculate score using the engine with dynamic config

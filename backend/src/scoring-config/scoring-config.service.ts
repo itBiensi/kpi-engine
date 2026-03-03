@@ -24,10 +24,10 @@ export class ScoringConfigService {
       config = await this.prisma.scoringConfig.create({
         data: {
           capMultiplier: 1.2,
-          gradeAThreshold: 90,
-          gradeBThreshold: 75,
-          gradeCThreshold: 60,
-          gradeDThreshold: 50,
+          excellentThreshold: 130,
+          veryGoodThreshold: 110,
+          goodThreshold: 90,
+          poorThreshold: 70,
         },
       });
     }
@@ -48,20 +48,20 @@ export class ScoringConfigService {
     // Merge with current values
     const newConfig = {
       capMultiplier: dto.capMultiplier ?? Number(currentConfig.capMultiplier),
-      gradeAThreshold: dto.gradeAThreshold ?? Number(currentConfig.gradeAThreshold),
-      gradeBThreshold: dto.gradeBThreshold ?? Number(currentConfig.gradeBThreshold),
-      gradeCThreshold: dto.gradeCThreshold ?? Number(currentConfig.gradeCThreshold),
-      gradeDThreshold: dto.gradeDThreshold ?? Number(currentConfig.gradeDThreshold),
+      excellentThreshold: dto.excellentThreshold ?? Number(currentConfig.excellentThreshold),
+      veryGoodThreshold: dto.veryGoodThreshold ?? Number(currentConfig.veryGoodThreshold),
+      goodThreshold: dto.goodThreshold ?? Number(currentConfig.goodThreshold),
+      poorThreshold: dto.poorThreshold ?? Number(currentConfig.poorThreshold),
     };
 
     // Validate thresholds are in descending order
     if (
-      newConfig.gradeAThreshold <= newConfig.gradeBThreshold ||
-      newConfig.gradeBThreshold <= newConfig.gradeCThreshold ||
-      newConfig.gradeCThreshold <= newConfig.gradeDThreshold
+      newConfig.excellentThreshold <= newConfig.veryGoodThreshold ||
+      newConfig.veryGoodThreshold <= newConfig.goodThreshold ||
+      newConfig.goodThreshold <= newConfig.poorThreshold
     ) {
       throw new BadRequestException(
-        'Grade thresholds must be in descending order: A > B > C > D',
+        'Grade thresholds must be in descending order: Excellent > Very Good > Good > Poor',
       );
     }
 
@@ -70,10 +70,10 @@ export class ScoringConfigService {
       where: { id: currentConfig.id },
       data: {
         capMultiplier: newConfig.capMultiplier,
-        gradeAThreshold: newConfig.gradeAThreshold,
-        gradeBThreshold: newConfig.gradeBThreshold,
-        gradeCThreshold: newConfig.gradeCThreshold,
-        gradeDThreshold: newConfig.gradeDThreshold,
+        excellentThreshold: newConfig.excellentThreshold,
+        veryGoodThreshold: newConfig.veryGoodThreshold,
+        goodThreshold: newConfig.goodThreshold,
+        poorThreshold: newConfig.poorThreshold,
         updatedBy: adminContext?.userId,
       },
     });

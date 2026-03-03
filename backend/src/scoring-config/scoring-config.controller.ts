@@ -25,10 +25,10 @@ export class ScoringConfigController {
       example: {
         id: 1,
         capMultiplier: 1.2,
-        gradeAThreshold: 90,
-        gradeBThreshold: 75,
-        gradeCThreshold: 60,
-        gradeDThreshold: 50,
+        excellentThreshold: 130,
+        veryGoodThreshold: 110,
+        goodThreshold: 90,
+        poorThreshold: 70,
         updatedAt: '2026-02-12T10:30:00.000Z',
         updatedBy: 1,
       },
@@ -51,17 +51,17 @@ export class ScoringConfigController {
 
 **Business Rules:**
 - Cap multiplier must be between 1.0 and 2.0
-- Grade thresholds must be in descending order: A > B > C > D
+- Grade thresholds must be in descending order: Excellent > Very Good > Good > Poor
 - All changes are logged to audit trail
 - New configuration applies to all future score calculations immediately
 
 **Default Values:**
 - Cap Multiplier: 1.2 (120% of weight)
-- Grade A: > 90
-- Grade B: > 75
-- Grade C: > 60
-- Grade D: > 50
-- Grade E: ≤ 50`,
+- Excellent: > 130%
+- Very Good: > 110%
+- Good: > 90%
+- Poor: > 70%
+- Bad: ≤ 70%`,
   })
   @ApiBody({
     type: UpdateScoringConfigDto,
@@ -70,10 +70,10 @@ export class ScoringConfigController {
       'Update All': {
         value: {
           capMultiplier: 1.5,
-          gradeAThreshold: 85,
-          gradeBThreshold: 70,
-          gradeCThreshold: 55,
-          gradeDThreshold: 45,
+          excellentThreshold: 140,
+          veryGoodThreshold: 115,
+          goodThreshold: 95,
+          poorThreshold: 75,
         },
         description: 'Update all configuration values',
       },
@@ -85,10 +85,10 @@ export class ScoringConfigController {
       },
       'Update Grades Only': {
         value: {
-          gradeAThreshold: 95,
-          gradeBThreshold: 80,
-          gradeCThreshold: 65,
-          gradeDThreshold: 50,
+          excellentThreshold: 135,
+          veryGoodThreshold: 112,
+          goodThreshold: 92,
+          poorThreshold: 72,
         },
         description: 'Update only grade thresholds',
       },
@@ -101,10 +101,10 @@ export class ScoringConfigController {
       example: {
         id: 1,
         capMultiplier: 1.5,
-        gradeAThreshold: 85,
-        gradeBThreshold: 70,
-        gradeCThreshold: 55,
-        gradeDThreshold: 45,
+        excellentThreshold: 140,
+        veryGoodThreshold: 115,
+        goodThreshold: 95,
+        poorThreshold: 75,
         updatedAt: '2026-02-12T10:35:00.000Z',
         updatedBy: 1,
       },
@@ -116,7 +116,7 @@ export class ScoringConfigController {
     schema: {
       example: {
         statusCode: 400,
-        message: 'Grade thresholds must be in descending order: A > B > C > D',
+        message: 'Grade thresholds must be in descending order: Excellent > Very Good > Good > Poor',
         error: 'Bad Request',
       },
     },

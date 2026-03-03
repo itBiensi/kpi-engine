@@ -17,54 +17,54 @@ export class UpdateScoringConfigDto {
   capMultiplier?: number;
 
   @ApiPropertyOptional({
-    description: 'Minimum score for grade A',
+    description: 'Minimum score percentage for Excellent grade',
+    example: 130,
+    minimum: 0,
+    maximum: 200,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(200)
+  excellentThreshold?: number;
+
+  @ApiPropertyOptional({
+    description: 'Minimum score percentage for Very Good grade',
+    example: 110,
+    minimum: 0,
+    maximum: 200,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(200)
+  veryGoodThreshold?: number;
+
+  @ApiPropertyOptional({
+    description: 'Minimum score percentage for Good grade',
     example: 90,
     minimum: 0,
-    maximum: 100,
+    maximum: 200,
   })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Max(100)
-  gradeAThreshold?: number;
+  @Max(200)
+  goodThreshold?: number;
 
   @ApiPropertyOptional({
-    description: 'Minimum score for grade B',
-    example: 75,
+    description: 'Minimum score percentage for Poor grade',
+    example: 70,
     minimum: 0,
-    maximum: 100,
+    maximum: 200,
   })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Max(100)
-  gradeBThreshold?: number;
-
-  @ApiPropertyOptional({
-    description: 'Minimum score for grade C',
-    example: 60,
-    minimum: 0,
-    maximum: 100,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  gradeCThreshold?: number;
-
-  @ApiPropertyOptional({
-    description: 'Minimum score for grade D',
-    example: 50,
-    minimum: 0,
-    maximum: 100,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  gradeDThreshold?: number;
+  @Max(200)
+  poorThreshold?: number;
 }

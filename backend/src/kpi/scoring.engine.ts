@@ -29,10 +29,10 @@ export interface ScoreResult {
 
 export interface ScoringConfigValues {
     capMultiplier?: number;
-    gradeAThreshold?: number;
-    gradeBThreshold?: number;
-    gradeCThreshold?: number;
-    gradeDThreshold?: number;
+    excellentThreshold?: number;
+    veryGoodThreshold?: number;
+    goodThreshold?: number;
+    poorThreshold?: number;
 }
 
 export class ScoringEngine {
@@ -120,19 +120,20 @@ export class ScoringEngine {
     }
 
     /**
-     * Determine letter grade based on total score
-     * Uses configurable thresholds or defaults: A: > 90, B: > 75, C: > 60, D: > 50, E: <= 50
+     * Determine category grade based on total score (as percentage)
+     * Uses configurable thresholds or defaults:
+     * Excellent: > 130%, Very Good: 110-130%, Good: 90-110%, Poor: 70-90%, Bad: <= 70%
      */
     static determineGrade(totalScore: number, config?: ScoringConfigValues): string {
-        const gradeA = config?.gradeAThreshold || 90;
-        const gradeB = config?.gradeBThreshold || 75;
-        const gradeC = config?.gradeCThreshold || 60;
-        const gradeD = config?.gradeDThreshold || 50;
+        const excellent = config?.excellentThreshold || 130;
+        const veryGood = config?.veryGoodThreshold || 110;
+        const good = config?.goodThreshold || 90;
+        const poor = config?.poorThreshold || 70;
 
-        if (totalScore > gradeA) return 'A';
-        if (totalScore > gradeB) return 'B';
-        if (totalScore > gradeC) return 'C';
-        if (totalScore > gradeD) return 'D';
-        return 'E';
+        if (totalScore > excellent) return 'Excellent';
+        if (totalScore > veryGood) return 'Very Good';
+        if (totalScore > good) return 'Good';
+        if (totalScore > poor) return 'Poor';
+        return 'Bad';
     }
 }
