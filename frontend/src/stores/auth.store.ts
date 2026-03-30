@@ -16,6 +16,7 @@ interface AuthState {
     login: (token: string, user: User) => void;
     logout: () => void;
     hydrate: () => void;
+    updateToken: (newToken: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -52,5 +53,12 @@ export const useAuthStore = create<AuthState>((set) => ({
                 }
             }
         }
+    },
+
+    updateToken: (newToken: string) => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('hris_token', newToken);
+        }
+        set({ token: newToken });
     },
 }));

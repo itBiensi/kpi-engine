@@ -66,6 +66,31 @@ function AchievementsContent() {
     // Check if form is editable based on workflow status
     const isEditable = plan && (plan.status === 'DRAFT' || plan.status === 'REJECTED');
 
+    const achievementDraftKey = selectedPlanId && user
+        ? `achievement_draft_${user.id}_${selectedPlanId}`
+        : null;
+
+    // Restore achievement draft on plan load (before server data overwrites blank fields)
+    useEffect(() => {
+        if (!achievementDraftKey) return;
+        try {
+            const saved = localStorage.getItem(achievementDraftKey);
+            if (saved) {
+                const savedValues = JSON.parse(saved);
+                setEditValues((prev) => ({ ...savedValues, ...prev }));
+            }
+        } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [achievementDraftKey]);
+
+    // Auto-save editValues whenever they change (only when editable)
+    useEffect(() => {
+        if (!achievementDraftKey || !isEditable) return;
+        try {
+            localStorage.setItem(achievementDraftKey, JSON.stringify(editValues));
+        } catch { /* storage quota exceeded — ignore */ }
+    }, [editValues, achievementDraftKey, isEditable]);
+
     // Check if user can add comments (manager or admin)
     const canAddComments = user && (user.role === 'MANAGER' || user.role === 'ADMIN');
 
@@ -129,6 +154,7 @@ function AchievementsContent() {
                 setPlan(updated);
             }
 
+            if (achievementDraftKey) localStorage.removeItem(achievementDraftKey);
             setSuccessMessage('Achievement saved successfully!');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err: any) {

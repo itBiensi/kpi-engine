@@ -66,6 +66,16 @@ export class AuthController {
         );
     }
 
+    @Post('refresh')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Refresh JWT token for authenticated user (session keep-alive)' })
+    @ApiResponse({ status: 200, description: 'New access token issued', schema: { type: 'object', properties: { access_token: { type: 'string' } } } })
+    @ApiResponse({ status: 401, description: 'Invalid or expired token' })
+    async refresh(@Request() req: any) {
+        return this.authService.refreshToken(req.user.id);
+    }
+
     @Post('password/reset')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('ADMIN')

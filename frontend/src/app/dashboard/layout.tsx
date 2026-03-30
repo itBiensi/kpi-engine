@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { authApi } from "@/lib/api";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import SessionTimeoutModal from "@/components/SessionTimeoutModal";
 import Link from "next/link";
 
 const navItems = [
@@ -103,6 +105,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
     const [mounted, setMounted] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Session timeout warning state
+    const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+    const [timeoutSecondsRemaining, setTimeoutSecondsRemaining] = useState(300);
+
+    const handleWarning = useCallback(({ secondsRemaining }: { showWarning: boolean; secondsRemaining: number }) => {
+        setTimeoutSecondsRemaining(secondsRemaining);
+        setShowTimeoutWarning(true);
+    }, []);
+
+    const handleDismissWarning = useCallback(() => {
+        setShowTimeoutWarning(false);
+    }, []);
+
+    const handleAutoLogout = useCallback(() => {
+        setShowTimeoutWarning(false);
+    }, []);
+
+    const { keepAlive } = useSessionTimeout({
+        onWarning: handleWarning,
+        onDismissWarning: handleDismissWarning,
+        onLogout: handleAutoLogout,
+        isAuthenticated,
+    });
 
     // Password change modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -322,6 +348,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <button
                             onClick={() => {
                                 logout();
+                                localStorage.removeItem('hris_redirect_url');
                                 window.location.href = '/login';
                             }}
                             className="sidebar-subtitle p-1.5 rounded-lg transition-colors hover:bg-gray-700"
@@ -340,6 +367,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <main className="flex-1 md:ml-64 p-4 pt-16 md:p-6 md:pt-6" style={{ minHeight: "100vh" }}>
                 {children}
             </main>
+
+            {/* Session Timeout Warning Modal */}
+            {showTimeoutWarning && (
+                <SessionTimeoutModal
+                    secondsRemaining={timeoutSecondsRemaining}
+                    onKeepAlive={keepAlive}
+                    onLogout={() => {
+                        setShowTimeoutWarning(false);
+                        logout();
+                        localStorage.removeItem('hris_redirect_url');
+                        window.location.href = '/login';
+                    }}
+                />
+            )}
 
             {/* Change Password Modal */}
             {showPasswordModal && (

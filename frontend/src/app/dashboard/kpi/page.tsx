@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { kpiApi } from "@/lib/api";
+import { kpiApi, periodsApi, usersApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth.store";
 import PeriodSelector from "@/components/PeriodSelector";
 import StatusBadge from "@/components/StatusBadge";
@@ -33,6 +33,18 @@ export default function KpiPlansPage() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Duplicate modal state
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+    const [duplicateSourcePlan, setDuplicateSourcePlan] = useState<any>(null);
+    const [duplicateTargetPeriodId, setDuplicateTargetPeriodId] = useState<number | "">("");
+    const [duplicateTargetUserId, setDuplicateTargetUserId] = useState<number | "">("");
+    const [duplicateLoading, setDuplicateLoading] = useState(false);
+    const [allPeriods, setAllPeriods] = useState<any[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [duplicateSuccess, setDuplicateSuccess] = useState("");
+    const [userSearch, setUserSearch] = useState("");
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+
     // Filter states
     const [filters, setFilters] = useState({
         employee: "",
@@ -47,14 +59,46 @@ export default function KpiPlansPage() {
     const totalWeight = details.reduce((sum, d) => sum + (d.weight || 0), 0);
     const isWeightValid = Math.abs(totalWeight - 100) < 0.01;
 
+    const draftKey = user ? `kpi_draft_${user.id}` : null;
+
+    // Restore draft from localStorage on mount
+    useEffect(() => {
+        if (!draftKey) return;
+        try {
+            const saved = localStorage.getItem(draftKey);
+            if (saved) {
+                const { details: savedDetails, periodId: savedPeriodId } = JSON.parse(saved);
+                if (savedDetails?.length) setDetails(savedDetails);
+                if (savedPeriodId) setPeriodId(savedPeriodId);
+            }
+        } catch { /* ignore malformed drafts */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [draftKey]);
+
+    // Auto-save details draft whenever they change
+    useEffect(() => {
+        if (!draftKey || !showCreate) return;
+        try {
+            localStorage.setItem(draftKey, JSON.stringify({ details, periodId }));
+        } catch { /* storage quota exceeded — ignore */ }
+    }, [details, periodId, draftKey, showCreate]);
+
     useEffect(() => {
         loadPlans();
+        loadPeriods();
     }, []);
 
     const loadPlans = async () => {
         try {
             const { data } = await kpiApi.listPlans();
             setPlans(data.data || []);
+        } catch { }
+    };
+
+    const loadPeriods = async () => {
+        try {
+            const { data } = await periodsApi.list();
+            setAllPeriods(data || []);
         } catch { }
     };
 
@@ -101,6 +145,7 @@ export default function KpiPlansPage() {
             });
             setShowCreate(false);
             setDetails([{ title: "", definition: "", polarity: "MAX", weight: 0, targetValue: 0, unit: "" }]);
+            if (draftKey) localStorage.removeItem(draftKey);
             loadPlans();
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to create plan");
@@ -140,6 +185,49 @@ export default function KpiPlansPage() {
             setError(err.response?.data?.message || "Failed to delete KPI data");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const openDuplicateModal = async (plan: any) => {
+        setDuplicateSourcePlan(plan);
+        setDuplicateTargetPeriodId("");
+        setDuplicateTargetUserId("");
+        setDuplicateSuccess("");
+        setUserSearch("");
+        setShowUserDropdown(false);
+        setShowDuplicateModal(true);
+
+        // Load users for admin
+        if (isAdmin && allUsers.length === 0) {
+            try {
+                const { data } = await usersApi.list({ limit: 500 });
+                setAllUsers(data.data || []);
+            } catch { }
+        }
+    };
+
+    const handleDuplicate = async () => {
+        if (!duplicateSourcePlan || !duplicateTargetPeriodId) return;
+
+        setDuplicateLoading(true);
+        setError("");
+        setDuplicateSuccess("");
+
+        try {
+            await kpiApi.duplicatePlan(duplicateSourcePlan.id, {
+                targetPeriodId: Number(duplicateTargetPeriodId),
+                targetUserId: duplicateTargetUserId ? Number(duplicateTargetUserId) : undefined,
+            });
+            setDuplicateSuccess("KPI plan duplicated successfully!");
+            loadPlans();
+            setTimeout(() => {
+                setShowDuplicateModal(false);
+                setDuplicateSuccess("");
+            }, 1500);
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to duplicate plan");
+        } finally {
+            setDuplicateLoading(false);
         }
     };
 
@@ -589,7 +677,7 @@ export default function KpiPlansPage() {
                                     </td>
                                     <td>{getGradeBadge(plan.finalGrade)}</td>
                                     <td>
-                                        <div className="flex gap-1">
+                                        <div className="flex gap-1 flex-wrap">
                                             {plan.status === "DRAFT" && (
                                                 <button onClick={() => submitPlan(plan.id)} className="btn btn-primary text-xs py-1 px-2">
                                                     Submit
@@ -600,6 +688,21 @@ export default function KpiPlansPage() {
                                                     Approve
                                                 </button>
                                             )}
+                                            <button
+                                                onClick={() => openDuplicateModal(plan)}
+                                                className="btn text-xs py-1 px-2"
+                                                style={{
+                                                    background: "hsla(262, 83%, 58%, 0.15)",
+                                                    color: "hsl(262, 83%, 68%)",
+                                                    border: "1px solid hsla(262, 83%, 58%, 0.3)"
+                                                }}
+                                                title="Duplicate this plan to another period"
+                                            >
+                                                <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                Duplicate
+                                            </button>
                                             <a
                                                 href={`/dashboard/achievements?planId=${plan.id}`}
                                                 className="btn btn-secondary text-xs py-1 px-2"
@@ -669,6 +772,228 @@ export default function KpiPlansPage() {
                                 onClick={() => setShowDeleteConfirm(false)}
                                 className="btn btn-secondary"
                                 disabled={isDeleting}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Duplicate KPI Modal */}
+            {showDuplicateModal && duplicateSourcePlan && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: "rgba(0, 0, 0, 0.7)" }}
+                    onClick={() => setShowDuplicateModal(false)}
+                >
+                    <div
+                        className="glass-card w-full max-w-md p-6 animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "hsla(262, 83%, 58%, 0.15)" }}>
+                                <svg className="w-6 h-6" fill="none" stroke="hsl(262, 83%, 68%)" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold" style={{ color: "hsl(var(--foreground))" }}>Duplicate KPI Plan</h2>
+                                <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Copy KPI structure to a new period</p>
+                            </div>
+                        </div>
+
+                        {/* Source plan info */}
+                        <div className="mb-4 p-3 rounded-lg" style={{ background: "hsla(217.2, 32.6%, 17.5%, 0.5)", border: "1px solid hsla(217.2, 32.6%, 25%, 0.3)" }}>
+                            <p className="text-xs font-medium mb-1" style={{ color: "hsl(var(--muted-foreground))" }}>Source Plan</p>
+                            <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>
+                                {duplicateSourcePlan.user?.fullName} — Period {duplicateSourcePlan.periodId}
+                            </p>
+                            <p className="text-xs mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                {duplicateSourcePlan.details?.length || 0} KPI items • Weight structure will be copied
+                            </p>
+                        </div>
+
+                        {/* Target period selector */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                Target Period *
+                            </label>
+                            <select
+                                value={duplicateTargetPeriodId}
+                                onChange={(e) => setDuplicateTargetPeriodId(e.target.value ? Number(e.target.value) : "")}
+                                className="w-full px-3 py-2.5 rounded-lg text-sm"
+                                style={{
+                                    background: "hsla(217.2, 32.6%, 17.5%, 0.5)",
+                                    border: "1px solid hsla(217.2, 32.6%, 25%, 0.3)",
+                                    color: "hsl(var(--foreground))"
+                                }}
+                            >
+                                <option value="">Select a period...</option>
+                                {allPeriods
+                                    .filter(p => p.id !== duplicateSourcePlan.periodId)
+                                    .map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} ({p.cycleType}) — {p.status}
+                                        </option>
+                                    ))}
+                            </select>
+                        </div>
+
+                        {/* Target user selector (admin only) */}
+                        {isAdmin && (
+                            <div className="mb-4 relative">
+                                <label className="block text-sm font-medium mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                    Target User <span className="text-xs opacity-60">(optional — defaults to original owner)</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={userSearch}
+                                        onChange={(e) => {
+                                            setUserSearch(e.target.value);
+                                            setShowUserDropdown(true);
+                                            if (!e.target.value) {
+                                                setDuplicateTargetUserId("");
+                                            }
+                                        }}
+                                        onFocus={() => setShowUserDropdown(true)}
+                                        placeholder={duplicateTargetUserId
+                                            ? allUsers.find(u => u.id === duplicateTargetUserId)?.fullName || 'Selected user'
+                                            : `Same user (${duplicateSourcePlan.user?.fullName}) — type to search...`
+                                        }
+                                        className="w-full px-3 py-2.5 rounded-lg text-sm"
+                                        style={{
+                                            background: "hsla(217.2, 32.6%, 17.5%, 0.5)",
+                                            border: showUserDropdown
+                                                ? "1px solid hsla(262, 83%, 58%, 0.5)"
+                                                : "1px solid hsla(217.2, 32.6%, 25%, 0.3)",
+                                            color: "hsl(var(--foreground))"
+                                        }}
+                                    />
+                                    {duplicateTargetUserId && (
+                                        <button
+                                            onClick={() => {
+                                                setDuplicateTargetUserId("");
+                                                setUserSearch("");
+                                            }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-1.5 py-0.5 rounded"
+                                            style={{ color: "hsl(var(--muted-foreground))", background: "hsla(217.2, 32.6%, 25%, 0.5)" }}
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                                {showUserDropdown && (
+                                    <div
+                                        className="absolute z-10 w-full mt-1 rounded-lg overflow-hidden"
+                                        style={{
+                                            background: "hsl(222, 47%, 11%)",
+                                            border: "1px solid hsla(217.2, 32.6%, 25%, 0.5)",
+                                            maxHeight: "200px",
+                                            overflowY: "auto",
+                                            boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
+                                        }}
+                                    >
+                                        <button
+                                            onClick={() => {
+                                                setDuplicateTargetUserId("");
+                                                setUserSearch("");
+                                                setShowUserDropdown(false);
+                                            }}
+                                            className="w-full text-left px-3 py-2 text-sm transition-colors"
+                                            style={{
+                                                color: !duplicateTargetUserId ? "hsl(262, 83%, 68%)" : "hsl(var(--muted-foreground))",
+                                                background: !duplicateTargetUserId ? "hsla(262, 83%, 58%, 0.1)" : "transparent",
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = "hsla(217.2, 32.6%, 25%, 0.5)"}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = !duplicateTargetUserId ? "hsla(262, 83%, 58%, 0.1)" : "transparent"}
+                                        >
+                                            Same user ({duplicateSourcePlan.user?.fullName})
+                                        </button>
+                                        {allUsers
+                                            .filter(u => {
+                                                if (!userSearch) return true;
+                                                const q = userSearch.toLowerCase();
+                                                return (
+                                                    u.fullName?.toLowerCase().includes(q) ||
+                                                    u.employeeId?.toLowerCase().includes(q) ||
+                                                    u.email?.toLowerCase().includes(q) ||
+                                                    u.deptCode?.toLowerCase().includes(q)
+                                                );
+                                            })
+                                            .map(u => (
+                                                <button
+                                                    key={u.id}
+                                                    onClick={() => {
+                                                        setDuplicateTargetUserId(u.id);
+                                                        setUserSearch(u.fullName);
+                                                        setShowUserDropdown(false);
+                                                    }}
+                                                    className="w-full text-left px-3 py-2 text-sm transition-colors"
+                                                    style={{
+                                                        color: duplicateTargetUserId === u.id ? "hsl(262, 83%, 68%)" : "hsl(var(--foreground))",
+                                                        background: duplicateTargetUserId === u.id ? "hsla(262, 83%, 58%, 0.1)" : "transparent",
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = "hsla(217.2, 32.6%, 25%, 0.5)"}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = duplicateTargetUserId === u.id ? "hsla(262, 83%, 58%, 0.1)" : "transparent"}
+                                                >
+                                                    <span className="font-medium">{u.fullName}</span>
+                                                    <span className="ml-2 opacity-60">({u.employeeId})</span>
+                                                    <span className="ml-2 opacity-40">{u.deptCode || 'No dept'}</span>
+                                                </button>
+                                            ))}
+                                        {allUsers.filter(u => {
+                                            if (!userSearch) return true;
+                                            const q = userSearch.toLowerCase();
+                                            return u.fullName?.toLowerCase().includes(q) || u.employeeId?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.deptCode?.toLowerCase().includes(q);
+                                        }).length === 0 && (
+                                            <div className="px-3 py-3 text-sm text-center" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                                No users match &quot;{userSearch}&quot;
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Info note */}
+                        <div className="mb-4 p-3 rounded-lg" style={{ background: "hsla(262, 83%, 58%, 0.08)", border: "1px solid hsla(262, 83%, 58%, 0.2)" }}>
+                            <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                ℹ️ Only KPI structure will be copied (titles, definitions, weights, targets, units). Actual values, scores, and comments will NOT be copied. The new plan starts as DRAFT.
+                            </p>
+                        </div>
+
+                        {/* Success message */}
+                        {duplicateSuccess && (
+                            <div className="mb-4 p-3 rounded-lg text-sm animate-fade-in" style={{
+                                background: "hsla(142, 76%, 36%, 0.15)",
+                                color: "hsl(142, 76%, 46%)",
+                                border: "1px solid hsla(142, 76%, 36%, 0.3)"
+                            }}>
+                                ✓ {duplicateSuccess}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleDuplicate}
+                                disabled={!duplicateTargetPeriodId || duplicateLoading}
+                                className="btn flex-1"
+                                style={{
+                                    background: !duplicateTargetPeriodId || duplicateLoading
+                                        ? "hsla(262, 83%, 58%, 0.3)"
+                                        : "hsl(262, 83%, 58%)",
+                                    color: "white",
+                                    cursor: !duplicateTargetPeriodId || duplicateLoading ? 'not-allowed' : 'pointer',
+                                }}
+                            >
+                                {duplicateLoading ? "Duplicating..." : "Duplicate Plan"}
+                            </button>
+                            <button
+                                onClick={() => setShowDuplicateModal(false)}
+                                className="btn btn-secondary"
+                                disabled={duplicateLoading}
                             >
                                 Cancel
                             </button>

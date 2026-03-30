@@ -18,6 +18,23 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// On 401, clear session and redirect to login (preserving current path for deep-link)
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401 && typeof window !== 'undefined') {
+            const currentPath = window.location.pathname + window.location.search;
+            if (currentPath !== '/login') {
+                localStorage.setItem('hris_redirect_url', currentPath);
+            }
+            localStorage.removeItem('hris_token');
+            localStorage.removeItem('hris_user');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Auth API
 export const authApi = {
     login: (email: string, password: string) =>
@@ -27,6 +44,8 @@ export const authApi = {
         api.put('/api/v1/auth/password', { currentPassword, newPassword }),
     resetPassword: (userId: number, newPassword: string) =>
         api.post('/api/v1/auth/password/reset', { userId, newPassword }),
+    refreshToken: () =>
+        api.post('/api/v1/auth/refresh'),
 };
 
 // Users API
@@ -118,6 +137,9 @@ export const kpiApi = {
 
     getNineBoxData: (periodId?: number) =>
         api.get('/api/v1/kpi/nine-box', { params: periodId ? { periodId } : {} }),
+
+    duplicatePlan: (id: number, data: { targetPeriodId: number; targetUserId?: number }) =>
+        api.post(`/api/v1/kpi/plans/${id}/duplicate`, data),
 
     cascadeKpi: (data: {
         sourceDetailId: number;

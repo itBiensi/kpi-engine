@@ -21,7 +21,13 @@ export default function LoginPage() {
         try {
             const { data } = await authApi.login(email, password);
             login(data.access_token, data.user);
-            router.push("/dashboard");
+            const redirectUrl = localStorage.getItem('hris_redirect_url');
+            if (redirectUrl) {
+                localStorage.removeItem('hris_redirect_url');
+                router.push(redirectUrl);
+            } else {
+                router.push("/dashboard");
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || "Login failed. Please check your credentials.");
         } finally {

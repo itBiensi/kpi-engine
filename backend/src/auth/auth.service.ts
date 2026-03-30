@@ -167,6 +167,26 @@ export class AuthService {
     }
 
     /**
+     * Reissues a fresh JWT for an already-authenticated user.
+     * Called by the client-side session-refresh ping.
+     */
+    async refreshToken(userId: number): Promise<{ access_token: string }> {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user || !user.isActive) {
+            throw new UnauthorizedException('User not found or inactive');
+        }
+
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+            employeeId: user.employeeId,
+        };
+
+        return { access_token: this.jwtService.sign(payload) };
+    }
+
+    /**
      * Admin resets any user's password
      * No current password required
      */
