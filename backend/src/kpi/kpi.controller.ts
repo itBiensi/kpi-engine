@@ -182,6 +182,36 @@ export class KpiController {
         );
     }
 
+    @Post('plans/:id/duplicate')
+    @ApiOperation({ summary: 'Duplicate a KPI plan to a different period' })
+    @ApiParam({ name: 'id', type: Number, description: 'Source KPI plan ID to duplicate' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                targetPeriodId: { type: 'number', description: 'Target period ID to duplicate into' },
+                targetUserId: { type: 'number', description: 'Target user ID (optional, defaults to source plan owner. Admin only for different users)' },
+            },
+            required: ['targetPeriodId'],
+        },
+    })
+    @ApiResponse({ status: 201, description: 'KPI plan duplicated successfully' })
+    @ApiResponse({ status: 400, description: 'Plan already exists for target user+period, or source plan is empty' })
+    @ApiResponse({ status: 403, description: 'Access denied — cannot duplicate other users\' plans' })
+    @ApiResponse({ status: 404, description: 'Source plan or target period not found' })
+    duplicatePlan(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: { targetPeriodId: number; targetUserId?: number },
+        @Request() req: any,
+    ) {
+        return this.kpiService.duplicatePlan(
+            id,
+            body.targetPeriodId,
+            req.user,
+            body.targetUserId,
+        );
+    }
+
     @Post('cascade')
     @ApiOperation({ summary: 'Cascade KPI to subordinate' })
     @ApiResponse({ status: 201, description: 'KPI cascaded successfully' })

@@ -839,4 +839,148 @@ export class KpiService {
             total: employees.length,
         };
     }
+
+    /**
+     * Duplicate a KPI plan from a previous period into a new target period.
+     * Copies only structure (title, definition, polarity, weight, target, unit).
+     * Actual values, scores, grades, comments, and evidence are NOT copied.
+     * The new plan starts as DRAFT with 0 scores.
+     *
+     * Access control:
+     * - ADMIN can duplicate any plan to any user+period
+     * - EMPLOYEE can only duplicate their own plans (targetUserId must be self)
+     * - MANAGER can duplicate their own + subordinates' plans
+     */
+    async duplicatePlan(
+        sourcePlanId: number,
+        targetPeriodId: number,
+        currentUser: { id: number; role: string },
+        targetUserId?: number,
+        context?: { ipAddress?: string; userAgent?: string },
+    ) {
+        // 1. Fetch source plan with details
+        const sourcePlan = await this.prisma.kpiHeader.findUnique({
+            where: { id: sourcePlanId },
+            include: {
+                details: { orderBy: { id: 'asc' } },
+                user: { select: { id: true, fullName: true } },
+            },
+        });
+
+        if (!sourcePlan) {
+            throw new NotFoundException(`Source KPI Plan #${sourcePlanId} not found`);
+        }
+
+        if (sourcePlan.details.length === 0) {
+            throw new BadRequestException('Source plan has no KPI items to duplicate');
+        }
+
+        // 2. Determine the target user
+        const effectiveTargetUserId = targetUserId || sourcePlan.userId;
+
+        // 3. Access control
+        if (currentUser.role !== 'ADMIN') {
+            if (currentUser.role === 'MANAGER') {
+                const subordinateIds = await this.usersService.getSubordinateIds(currentUser.id);
+                const allowedIds = [currentUser.id, ...subordinateIds];
+                if (!allowedIds.includes(sourcePlan.userId)) {
+                    throw new ForbiddenException('You can only duplicate your own or your subordinates\' KPI plans');
+                }
+                if (!allowedIds.includes(effectiveTargetUserId)) {
+                    throw new ForbiddenException('You can only duplicate to yourself or your subordinates');
+                }
+            } else {
+                // EMPLOYEE — can only duplicate own plan to own plan
+                if (sourcePlan.userId !== currentUser.id) {
+                    throw new ForbiddenException('You can only duplicate your own KPI plans');
+                }
+                if (effectiveTargetUserId !== currentUser.id) {
+                    throw new ForbiddenException('You can only duplicate to yourself');
+                }
+            }
+        }
+
+        // 4. Validate target user exists
+        const targetUser = await this.prisma.user.findUnique({
+            where: { id: effectiveTargetUserId },
+        });
+        if (!targetUser) {
+            throw new NotFoundException(`Target user with ID ${effectiveTargetUserId} not found`);
+        }
+
+        // 5. Validate target period exists
+        const targetPeriod = await this.prisma.period.findUnique({
+            where: { id: targetPeriodId },
+        });
+        if (!targetPeriod) {
+            throw new NotFoundException(`Target period with ID ${targetPeriodId} not found`);
+        }
+
+        // 6. Check no existing plan for target user + period
+        const existing = await this.prisma.kpiHeader.findFirst({
+            where: {
+                userId: effectiveTargetUserId,
+                periodId: targetPeriodId,
+            },
+        });
+        if (existing) {
+            throw new BadRequestException(
+                `A KPI plan already exists for this user and target period (Plan ID: ${existing.id})`,
+            );
+        }
+
+        // 7. Create new plan transactionally
+        const newHeader = await this.prisma.$transaction(async (tx) => {
+            const createdHeader = await tx.kpiHeader.create({
+                data: {
+                    userId: effectiveTargetUserId,
+                    periodId: targetPeriodId,
+                    status: 'DRAFT',
+                    totalScore: 0,
+                },
+            });
+
+            await tx.kpiDetail.createMany({
+                data: sourcePlan.details.map((d) => ({
+                    headerId: createdHeader.id,
+                    title: d.title,
+                    definition: d.definition,
+                    polarity: d.polarity,
+                    weight: Number(d.weight),
+                    targetValue: Number(d.targetValue),
+                    actualValue: 0,
+                    achievementPct: 0,
+                    finalScore: 0,
+                    unit: d.unit,
+                })),
+            });
+
+            return createdHeader;
+        });
+
+        // 8. Audit log
+        await this.auditService.log(
+            'KPI_CREATED',
+            {
+                userId: currentUser.id,
+                ipAddress: context?.ipAddress,
+                userAgent: context?.userAgent,
+            },
+            {
+                resourceType: 'KpiHeader',
+                resourceId: newHeader.id,
+                details: {
+                    action: 'DUPLICATED',
+                    sourcePlanId: sourcePlanId,
+                    sourcePeriodId: sourcePlan.periodId,
+                    targetUserId: effectiveTargetUserId,
+                    targetPeriodId: targetPeriodId,
+                    kpiCount: sourcePlan.details.length,
+                },
+            },
+        );
+
+        // 9. Return new plan with details
+        return this.findPlanById(newHeader.id, { role: 'ADMIN', id: 0 });
+    }
 }
