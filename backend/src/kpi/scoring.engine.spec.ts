@@ -129,25 +129,27 @@ describe('ScoringEngine', () => {
             // MIN: ((20-8)/10)*30 = 36, capped at 30*1.2 = 36
             // BINARY: 30
             expect(result.totalScore).toBe(102);
-            expect(result.finalGrade).toBe('A');
+            // 102 is in the Good band (> 90, <= 110)
+            expect(result.finalGrade).toBe('Good');
         });
     });
 
     describe('Grade determination', () => {
-        it('should return A for score > 90', () => {
-            expect(ScoringEngine.determineGrade(95)).toBe('A');
+        // Default thresholds: Excellent > 130, Very Good > 110, Good > 90, Poor > 70, Bad <= 70
+        it('should return Excellent for score > 130', () => {
+            expect(ScoringEngine.determineGrade(135)).toBe('Excellent');
         });
-        it('should return B for score > 75', () => {
-            expect(ScoringEngine.determineGrade(80)).toBe('B');
+        it('should return Very Good for score 110-130', () => {
+            expect(ScoringEngine.determineGrade(120)).toBe('Very Good');
         });
-        it('should return C for score > 60', () => {
-            expect(ScoringEngine.determineGrade(65)).toBe('C');
+        it('should return Good for score 90-110', () => {
+            expect(ScoringEngine.determineGrade(100)).toBe('Good');
         });
-        it('should return D for score > 50', () => {
-            expect(ScoringEngine.determineGrade(55)).toBe('D');
+        it('should return Poor for score 70-90', () => {
+            expect(ScoringEngine.determineGrade(80)).toBe('Poor');
         });
-        it('should return E for score <= 50', () => {
-            expect(ScoringEngine.determineGrade(40)).toBe('E');
+        it('should return Bad for score <= 70', () => {
+            expect(ScoringEngine.determineGrade(50)).toBe('Bad');
         });
     });
 });

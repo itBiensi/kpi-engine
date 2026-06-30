@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { kpiApi } from "@/lib/api";
+import { kpiApi, scoringConfigApi } from "@/lib/api";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import StatusBadge from "@/components/StatusBadge";
@@ -62,6 +62,27 @@ function AchievementsContent() {
     const [commentValues, setCommentValues] = useState<Record<number, string>>({});
     const [commentSaving, setCommentSaving] = useState<number | null>(null);
     const [showCommentFor, setShowCommentFor] = useState<number | null>(null);
+
+    // Scoring thresholds (mirrors backend determineGrade). Defaults match scoring.engine.ts
+    // and are overridden by the admin-configured values from scoring_config via API.
+    const [scoringConfig, setScoringConfig] = useState({
+        excellentThreshold: 130,
+        veryGoodThreshold: 110,
+        goodThreshold: 90,
+        poorThreshold: 70,
+    });
+
+    // Load scoring config thresholds so the grade matches the backend/scoring_config
+    useEffect(() => {
+        scoringConfigApi.getConfig().then(({ data }) => {
+            setScoringConfig({
+                excellentThreshold: Number(data.excellentThreshold),
+                veryGoodThreshold: Number(data.veryGoodThreshold),
+                goodThreshold: Number(data.goodThreshold),
+                poorThreshold: Number(data.poorThreshold),
+            });
+        }).catch(() => { /* keep defaults if config can't be loaded */ });
+    }, []);
 
     // Check if form is editable based on workflow status
     const isEditable = plan && (plan.status === 'DRAFT' || plan.status === 'REJECTED');
@@ -189,12 +210,14 @@ function AchievementsContent() {
     const totalScore = plan?.details?.reduce((sum: number, d: any) => sum + Number(d.finalScore || 0), 0) || 0;
     const roundedTotal = Math.round(totalScore * 100) / 100;
 
+    // Category rating — mirrors backend ScoringEngine.determineGrade, using thresholds
+    // from scoring_config (loaded above). Score is a percentage of total weight.
     const getGradeInfo = (score: number) => {
-        if (score > 90) return { grade: "A", color: "142, 76%, 46%", label: "Excellent" };
-        if (score > 75) return { grade: "B", color: "160, 84%, 39%", label: "Good" };
-        if (score > 60) return { grade: "C", color: "38, 92%, 50%", label: "Average" };
-        if (score > 50) return { grade: "D", color: "25, 95%, 53%", label: "Below Average" };
-        return { grade: "E", color: "0, 72%, 55%", label: "Poor" };
+        if (score > scoringConfig.excellentThreshold) return { color: "142, 76%, 46%", label: "Excellent" };
+        if (score > scoringConfig.veryGoodThreshold) return { color: "160, 84%, 39%", label: "Very Good" };
+        if (score > scoringConfig.goodThreshold) return { color: "190, 80%, 42%", label: "Good" };
+        if (score > scoringConfig.poorThreshold) return { color: "38, 92%, 50%", label: "Poor" };
+        return { color: "0, 72%, 55%", label: "Bad" };
     };
 
     return (
@@ -309,14 +332,11 @@ function AchievementsContent() {
                             {(() => {
                                 const info = getGradeInfo(roundedTotal);
                                 return (
-                                    <div className="flex items-center gap-3 mt-1">
+                                    <div className="flex items-center mt-1">
                                         <span
-                                            className="text-4xl font-bold"
+                                            className="text-3xl font-bold"
                                             style={{ color: `hsl(${info.color})` }}
                                         >
-                                            {info.grade}
-                                        </span>
-                                        <span className="text-sm" style={{ color: `hsl(${info.color})` }}>
                                             {info.label}
                                         </span>
                                     </div>

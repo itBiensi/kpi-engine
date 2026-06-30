@@ -132,7 +132,7 @@ model KpiHeader {
   periodId       Int       @map("period_id")
   status         KpiStatus @default(DRAFT)
   totalScore     Decimal   @default(0) @map("total_score") @db.Decimal(5, 2)
-  finalGrade     String?   @map("final_grade") @db.VarChar(2)
+  finalGrade     String?   @map("final_grade") @db.VarChar(20)
   createdAt      DateTime  @default(now()) @map("created_at")
 
   // Workflow audit fields

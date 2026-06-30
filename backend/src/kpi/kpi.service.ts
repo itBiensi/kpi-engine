@@ -762,7 +762,7 @@ export class KpiService {
     /**
      * Get Nine-Box Grid data for talent management
      * Performance (X-axis): Based on totalScore — Low (0–50), Medium (50–75), High (75+)
-     * Potential (Y-axis): Based on finalGrade — Low (E/D), Medium (C), High (A/B)
+     * Potential (Y-axis): Based on finalGrade — Low (Poor/Bad), Medium (Good), High (Excellent/Very Good)
      * Admin only
      */
     async getNineBoxData(periodId?: number) {
@@ -790,7 +790,7 @@ export class KpiService {
 
         const employees = headers.map((h) => {
             const score = Number(h.totalScore);
-            const grade = h.finalGrade || 'E';
+            const grade = h.finalGrade || 'Bad';
 
             // Performance level based on totalScore
             let performanceLevel: 'LOW' | 'MEDIUM' | 'HIGH';
@@ -798,10 +798,10 @@ export class KpiService {
             else if (score >= 50) performanceLevel = 'MEDIUM';
             else performanceLevel = 'LOW';
 
-            // Potential level based on finalGrade
+            // Potential level based on finalGrade (category-based rating)
             let potentialLevel: 'LOW' | 'MEDIUM' | 'HIGH';
-            if (grade === 'A' || grade === 'B') potentialLevel = 'HIGH';
-            else if (grade === 'C') potentialLevel = 'MEDIUM';
+            if (grade === 'Excellent' || grade === 'Very Good') potentialLevel = 'HIGH';
+            else if (grade === 'Good') potentialLevel = 'MEDIUM';
             else potentialLevel = 'LOW';
 
             return {

@@ -234,16 +234,16 @@ export default function KpiPlansPage() {
     const getGradeBadge = (grade: string | null) => {
         if (!grade) return null;
         const colors: Record<string, string> = {
-            A: "142, 76%, 46%",
-            B: "160, 84%, 39%",
-            C: "38, 92%, 50%",
-            D: "25, 95%, 53%",
-            E: "0, 72%, 55%",
+            Excellent: "142, 76%, 46%",
+            "Very Good": "160, 84%, 39%",
+            Good: "190, 80%, 42%",
+            Poor: "38, 92%, 50%",
+            Bad: "0, 72%, 55%",
         };
         const c = colors[grade] || "215, 20.2%, 60%";
         return (
             <span
-                className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold"
+                className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap"
                 style={{ background: `hsla(${c}, 0.15)`, color: `hsl(${c})` }}
             >
                 {grade}
@@ -424,11 +424,11 @@ export default function KpiPlansPage() {
                             }}
                         >
                             <option value="">All Grades</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                            <option value="E">E</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Very Good">Very Good</option>
+                            <option value="Good">Good</option>
+                            <option value="Poor">Poor</option>
+                            <option value="Bad">Bad</option>
                         </select>
                     </div>
                 </div>
