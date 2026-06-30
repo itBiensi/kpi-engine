@@ -4,6 +4,29 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth.store';
 import { scoringConfigApi } from '@/lib/api';
 
+// Category palette — kept in sync with the grade badges on the KPI and
+// Achievements pages so a rating looks identical everywhere in the app.
+const CATEGORY_HSL: Record<string, string> = {
+  Excellent: '142, 76%, 46%',
+  'Very Good': '160, 84%, 39%',
+  Good: '190, 80%, 42%',
+  Poor: '38, 92%, 50%',
+  Bad: '0, 72%, 55%',
+};
+
+const catHsl = (grade: string) => CATEGORY_HSL[grade] ?? '215, 20%, 55%';
+
+// Soft tinted surface (bg + text + border) that reads correctly in both themes
+// because it layers translucent brand colour over the themed card.
+const catTint = (grade: string) => {
+  const c = catHsl(grade);
+  return {
+    background: `hsla(${c}, 0.12)`,
+    color: `hsl(${c})`,
+    border: `1px solid hsla(${c}, 0.3)`,
+  };
+};
+
 export default function ScoringConfigPage() {
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(true);
@@ -37,7 +60,7 @@ export default function ScoringConfigPage() {
         goodThreshold: Number(data.goodThreshold),
         poorThreshold: Number(data.poorThreshold),
       });
-    } catch (error: any) {
+    } catch (error) {
       setErrors(['Failed to load scoring configuration']);
       console.error(error);
     } finally {
@@ -84,8 +107,10 @@ export default function ScoringConfigPage() {
       fetchConfig(); // Refresh config
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error: any) {
-      setErrors([error.response?.data?.message || 'Failed to update configuration']);
+    } catch (error) {
+      const apiMessage = (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message;
+      setErrors([apiMessage || 'Failed to update configuration']);
       console.error(error);
     } finally {
       setSaving(false);
@@ -100,29 +125,15 @@ export default function ScoringConfigPage() {
     return 'Bad';
   };
 
-  const getGradeColor = (grade: string): string => {
-    switch (grade) {
-      case 'Excellent':
-        return 'text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900';
-      case 'Very Good':
-        return 'text-cyan-700 dark:text-cyan-200 bg-cyan-100 dark:bg-cyan-800';
-      case 'Good':
-        return 'text-green-700 dark:text-green-200 bg-green-100 dark:bg-green-800';
-      case 'Poor':
-        return 'text-amber-700 dark:text-amber-200 bg-amber-100 dark:bg-amber-800';
-      case 'Bad':
-        return 'text-red-700 dark:text-red-200 bg-red-100 dark:bg-red-800';
-      default:
-        return 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800';
-    }
-  };
-
   // Check if user is admin
   if (user?.role !== 'ADMIN') {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          <strong>Access Denied:</strong> This page is only accessible to administrators.
+      <div className="p-6 max-w-4xl mx-auto">
+        <div
+          className="glass-card px-4 py-3"
+          style={catTint('Bad')}
+        >
+          <strong>Access denied:</strong> This page is only available to administrators.
         </div>
       </div>
     );
@@ -131,26 +142,66 @@ export default function ScoringConfigPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p>Loading configuration...</p>
+        <p style={{ color: 'hsl(var(--muted-foreground))' }}>Loading configuration…</p>
       </div>
     );
   }
 
+  const thresholdFields = [
+    {
+      key: 'excellentThreshold' as const,
+      grade: 'Excellent',
+      label: 'Excellent threshold',
+      fallback: 130,
+    },
+    {
+      key: 'veryGoodThreshold' as const,
+      grade: 'Very Good',
+      label: 'Very Good threshold',
+      fallback: 110,
+    },
+    {
+      key: 'goodThreshold' as const,
+      grade: 'Good',
+      label: 'Good threshold',
+      fallback: 90,
+    },
+    {
+      key: 'poorThreshold' as const,
+      grade: 'Poor',
+      label: 'Poor threshold',
+      fallback: 70,
+    },
+  ];
+
+  const previewRows = [
+    { grade: 'Excellent', range: `> ${config.excellentThreshold}%` },
+    { grade: 'Very Good', range: `${config.veryGoodThreshold}% – ${config.excellentThreshold}%` },
+    { grade: 'Good', range: `${config.goodThreshold}% – ${config.veryGoodThreshold}%` },
+    { grade: 'Poor', range: `${config.poorThreshold}% – ${config.goodThreshold}%` },
+    { grade: 'Bad', range: `≤ ${config.poorThreshold}%` },
+  ];
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Scoring Configuration</h1>
-      <p className="text-gray-600 mb-6">
-        Configure dynamic scoring rules for KPI calculations. Changes apply to all future score calculations.
+      <h1 className="text-2xl font-bold mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+        Scoring Configuration
+      </h1>
+      <p className="mb-6" style={{ color: 'hsl(var(--muted-foreground))' }}>
+        Set how KPI scores are capped and how total scores map to category ratings.
+        Changes apply to all future score calculations.
       </p>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Score Calculation Settings</h2>
+      <div className="glass-card p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'hsl(var(--foreground))' }}>
+          Score calculation settings
+        </h2>
 
         {/* Cap Multiplier */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Cap Multiplier
-            <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+            Cap multiplier
+            <span className="font-normal ml-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
               (Maximum score as % of weight)
             </span>
           </label>
@@ -163,114 +214,60 @@ export default function ScoringConfigPage() {
             onChange={(e) =>
               setConfig({ ...config, capMultiplier: parseFloat(e.target.value) || 1.2 })
             }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full"
           />
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
             Current: {(config.capMultiplier * 100).toFixed(0)}% of weight. Default is 1.2 (120%).
           </p>
         </div>
 
         {/* Grade Thresholds */}
         <div className="mb-4">
-          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">Category Thresholds (%)</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Total scores above these percentage thresholds will receive the corresponding category rating.
+          <h3 className="text-base font-medium mb-1" style={{ color: 'hsl(var(--foreground))' }}>
+            Category thresholds (%)
+          </h3>
+          <p className="text-sm mb-4" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            A total score above each threshold earns the matching category rating.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Excellent */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <span className="inline-block w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded mr-2"></span>
-                Excellent Threshold
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={config.excellentThreshold}
-                onChange={(e) =>
-                  setConfig({ ...config, excellentThreshold: parseFloat(e.target.value) || 130 })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Score &gt; {config.excellentThreshold}% = Excellent
-              </p>
-            </div>
-
-            {/* Very Good */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <span className="inline-block w-3 h-3 bg-cyan-500 dark:bg-cyan-400 rounded mr-2"></span>
-                Very Good Threshold
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={config.veryGoodThreshold}
-                onChange={(e) =>
-                  setConfig({ ...config, veryGoodThreshold: parseFloat(e.target.value) || 110 })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Score &gt; {config.veryGoodThreshold}% = Very Good
-              </p>
-            </div>
-
-            {/* Good */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <span className="inline-block w-3 h-3 bg-green-500 dark:bg-green-400 rounded mr-2"></span>
-                Good Threshold
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={config.goodThreshold}
-                onChange={(e) =>
-                  setConfig({ ...config, goodThreshold: parseFloat(e.target.value) || 90 })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Score &gt; {config.goodThreshold}% = Good
-              </p>
-            </div>
-
-            {/* Poor */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <span className="inline-block w-3 h-3 bg-amber-500 dark:bg-amber-400 rounded mr-2"></span>
-                Poor Threshold
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={config.poorThreshold}
-                onChange={(e) =>
-                  setConfig({ ...config, poorThreshold: parseFloat(e.target.value) || 70 })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Score &gt; {config.poorThreshold}% = Poor
-              </p>
-            </div>
+            {thresholdFields.map((f) => (
+              <div key={f.key}>
+                <label className="flex items-center text-sm font-medium mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+                  <span
+                    className="inline-block w-3 h-3 rounded mr-2"
+                    style={{ background: `hsl(${catHsl(f.grade)})` }}
+                  ></span>
+                  {f.label}
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  value={config[f.key]}
+                  onChange={(e) =>
+                    setConfig({ ...config, [f.key]: parseFloat(e.target.value) || f.fallback })
+                  }
+                  className="w-full"
+                />
+                <p className="text-sm mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  Score &gt; {config[f.key]}% = {f.grade}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Success Message */}
         {successMessage && (
-          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 px-4 py-3 rounded mb-4">
+          <div className="px-4 py-3 rounded-lg mb-4" style={catTint('Excellent')}>
             <strong>Success:</strong> {successMessage}
           </div>
         )}
 
         {/* Validation Errors */}
         {errors.length > 0 && (
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
-            <strong>Validation Errors:</strong>
+          <div className="px-4 py-3 rounded-lg mb-4" style={catTint('Bad')}>
+            <strong>Please fix the following:</strong>
             <ul className="list-disc list-inside mt-2">
               {errors.map((error, idx) => (
                 <li key={idx}>{error}</li>
@@ -281,91 +278,82 @@ export default function ScoringConfigPage() {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Saving...' : 'Save Configuration'}
+          <button onClick={handleSave} disabled={saving} className="btn btn-primary px-6">
+            {saving ? 'Saving…' : 'Save configuration'}
           </button>
         </div>
       </div>
 
       {/* Grade Preview Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Category Preview</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Preview of how total scores will be categorized with current thresholds:
+      <div className="glass-card p-6">
+        <h2 className="text-lg font-semibold mb-4" style={{ color: 'hsl(var(--foreground))' }}>
+          Category preview
+        </h2>
+        <p className="text-sm mb-4" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          How total scores are categorized with the current thresholds.
         </p>
 
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 dark:bg-gray-700">
-              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left dark:text-white">Score Range (%)</th>
-              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left dark:text-white">Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bg-blue-50 dark:bg-blue-900">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold dark:text-gray-300">
-                &gt; {config.excellentThreshold}%
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-blue-600 dark:text-blue-300">
-                Excellent
-              </td>
-            </tr>
-            <tr className="bg-cyan-50 dark:bg-cyan-800">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
-                {config.veryGoodThreshold}% - {config.excellentThreshold}%
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-cyan-600 dark:text-cyan-300">
-                Very Good
-              </td>
-            </tr>
-            <tr className="bg-green-50 dark:bg-green-800">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
-                {config.goodThreshold}% - {config.veryGoodThreshold}%
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-green-600 dark:text-green-300">
-                Good
-              </td>
-            </tr>
-            <tr className="bg-amber-50 dark:bg-amber-800">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
-                {config.poorThreshold}% - {config.goodThreshold}%
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-amber-600 dark:text-amber-300">
-                Poor
-              </td>
-            </tr>
-            <tr className="bg-red-50 dark:bg-red-800">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 dark:text-gray-300">
-                &le; {config.poorThreshold}%
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-semibold text-red-600 dark:text-red-300">
-                Bad
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="overflow-hidden rounded-lg" style={{ border: '1px solid hsl(var(--border))' }}>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th
+                  className="px-4 py-2 text-left font-semibold"
+                  style={{ background: 'hsla(217.2, 32.6%, 30%, 0.2)', color: 'hsl(var(--foreground))', borderBottom: '1px solid hsl(var(--border))' }}
+                >
+                  Score range (%)
+                </th>
+                <th
+                  className="px-4 py-2 text-left font-semibold"
+                  style={{ background: 'hsla(217.2, 32.6%, 30%, 0.2)', color: 'hsl(var(--foreground))', borderBottom: '1px solid hsl(var(--border))' }}
+                >
+                  Category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {previewRows.map((row, idx) => (
+                <tr key={row.grade} style={{ background: `hsla(${catHsl(row.grade)}, 0.08)` }}>
+                  <td
+                    className="px-4 py-2 font-medium"
+                    style={{ color: 'hsl(var(--foreground))', borderTop: idx ? '1px solid hsl(var(--border))' : 'none' }}
+                  >
+                    {row.range}
+                  </td>
+                  <td
+                    className="px-4 py-2 font-semibold"
+                    style={{ color: `hsl(${catHsl(row.grade)})`, borderTop: idx ? '1px solid hsl(var(--border))' : 'none' }}
+                  >
+                    {row.grade}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         {/* Interactive Score Preview */}
         <div className="mt-6">
-          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Try a Score</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            Enter any score percentage to preview the category assignment:
+          <h3 className="text-base font-medium mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+            Try a score
+          </h3>
+          <p className="text-sm mb-3" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            Enter a score percentage to preview its category.
           </p>
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
             <input
               type="number"
               step="1"
               value={sampleScore}
               onChange={(e) => setSampleScore(e.target.value)}
-              placeholder="Enter score % (e.g., 115)"
-              className="w-48 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 115"
+              className="w-48"
             />
             {sampleScore !== '' && !isNaN(parseFloat(sampleScore)) && (
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 ${getGradeColor(getGradeForScore(parseFloat(sampleScore)))}`}>
+              <div
+                className="flex items-center gap-2 px-4 py-2 rounded-lg"
+                style={catTint(getGradeForScore(parseFloat(sampleScore)))}
+              >
                 <span className="text-sm font-medium">Category:</span>
                 <span className="text-xl font-bold">
                   {getGradeForScore(parseFloat(sampleScore))}
@@ -377,14 +365,17 @@ export default function ScoringConfigPage() {
 
         {/* Example Calculations */}
         <div className="mt-6">
-          <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Example Scores:</h3>
+          <h3 className="text-base font-medium mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+            Example scores
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {[140, 120, 100, 80, 60].map((score) => {
               const grade = getGradeForScore(score);
               return (
                 <div
                   key={score}
-                  className={`border border-gray-300 dark:border-gray-600 rounded p-3 text-center ${getGradeColor(grade)}`}
+                  className="rounded-lg p-3 text-center"
+                  style={catTint(grade)}
                 >
                   <div className="text-2xl font-bold">{score}%</div>
                   <div className="text-sm font-semibold mt-1">{grade}</div>
